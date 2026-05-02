@@ -701,7 +701,6 @@ function render() {
         </div>
       </div>
       <div class="task-actions">
-        <button class="act-btn" title="${t.pinned?'Unstar':'Star'}" onclick="event.stopPropagation();togglePin('${t.id}')">${t.pinned?'★':'☆'}</button>
         <button class="act-btn" title="Delete" onclick="event.stopPropagation();deleteTask('${t.id}')">✕</button>
       </div>
     </div>`;
