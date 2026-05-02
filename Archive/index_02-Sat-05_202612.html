@@ -391,7 +391,7 @@ textarea.form-input { resize: vertical; min-height: 70px; }
       <button class="chip" data-pf="4" onclick="togglePF(4)">P4 Low</button>
       <select class="sort-select" id="sort-sel" onchange="render()">
         <option value="created">Sort: Date Added</option>
-        <option value="priority" selected>Sort: Priority</option>
+        <option value="priority">Sort: Priority</option>
         <option value="due">Sort: Due Date</option>
         <option value="alpha">Sort: A–Z</option>
         <option value="pinned">Sort: Starred First</option>
@@ -526,10 +526,9 @@ textarea.form-input { resize: vertical; min-height: 70px; }
       </div>
     </div>
     <div class="form-group">
-      <button type="button" id="f-pinned-btn" onclick="toggleFormPin()" style="display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:14px;cursor:pointer;font-family:var(--font);color:var(--text2);transition:all 0.15s;width:100%">
-        <span id="f-pinned-star" style="font-size:18px;color:var(--text3)">☆</span>
-        <span id="f-pinned-label">Star this task</span>
-      </button>
+      <label class="check-label">
+        <input type="checkbox" id="f-pinned"> Star / Pin this task
+      </label>
     </div>
     <div class="form-footer">
       <button class="btn-sec" onclick="closeModal()">Cancel</button>
@@ -688,9 +687,9 @@ function render() {
     const catName = getCatName(t.category_id);
     return `<div class="task-card${ov?' overdue':''}${t.done?' done':''}" onclick="openEdit('${t.id}')">
       <div class="check-btn${t.done?' done':''}" onclick="event.stopPropagation();toggleDone('${t.id}')"></div>
-      ${t.pinned?`<span class="star-icon" onclick="event.stopPropagation();togglePin('${t.id}')" title="Unstar">★</span>`:''}
       <div class="task-body">
         <div class="task-title-row">
+          ${t.pinned?'<span class="star-icon">★</span>':''}
           <span class="task-title">${esc(t.title)}</span>
         </div>
         <div class="task-meta">
@@ -782,7 +781,7 @@ function openNew() {
   document.getElementById('f-due-date').value = '';
   document.getElementById('f-due-time').value = '';
   document.getElementById('f-recur').value = '';
-  setFormPin(false);
+  document.getElementById('f-pinned').checked = false;
   fillCatSelect(null); selPrio(4); renderSubtasks();
   document.getElementById('task-modal').style.display = 'flex';
   setTimeout(()=>document.getElementById('f-title').focus(), 60);
@@ -798,7 +797,7 @@ function openEdit(id) {
   document.getElementById('f-due-date').value = t.due_date||'';
   document.getElementById('f-due-time').value = t.due_time||'';
   document.getElementById('f-recur').value = t.recur||'';
-  setFormPin(!!t.pinned);
+  document.getElementById('f-pinned').checked = !!t.pinned;
   fillCatSelect(t.category_id); selPrio(t.priority); renderSubtasks();
   document.getElementById('task-modal').style.display = 'flex';
 }
@@ -841,7 +840,7 @@ async function saveTask() {
     due_time: document.getElementById('f-due-time').value || null,
     recur: document.getElementById('f-recur').value || null,
     notes: document.getElementById('f-notes').value || null,
-    pinned: getFormPin(),
+    pinned: document.getElementById('f-pinned').checked,
     subtasks: state.formSubtasks
   };
   closeModal();
@@ -1045,33 +1044,6 @@ async function confirmImport() {
   setSyncStatus('synced');
   render();
   showToast('Imported ' + imported + ' task' + (imported !== 1 ? 's' : '') + ' successfully');
-}
-
-// ── Star / Pin form helpers ───────────────────────────────────────────────────
-function setFormPin(val) {
-  const btn = document.getElementById('f-pinned-btn');
-  const star = document.getElementById('f-pinned-star');
-  const label = document.getElementById('f-pinned-label');
-  btn._pinned = val;
-  if (val) {
-    star.textContent = '★';
-    star.style.color = 'var(--warning)';
-    label.textContent = 'Starred';
-    btn.style.borderColor = 'var(--warning)';
-    btn.style.color = 'var(--text)';
-  } else {
-    star.textContent = '☆';
-    star.style.color = 'var(--text3)';
-    label.textContent = 'Star this task';
-    btn.style.borderColor = 'var(--border)';
-    btn.style.color = 'var(--text2)';
-  }
-}
-function getFormPin() {
-  return !!document.getElementById('f-pinned-btn')._pinned;
-}
-function toggleFormPin() {
-  setFormPin(!getFormPin());
 }
 
 // ── Mobile Navigation ─────────────────────────────────────────────────────────
