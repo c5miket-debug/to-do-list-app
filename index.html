@@ -199,6 +199,147 @@ textarea.form-input { resize: vertical; min-height: 70px; }
   .modal { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
   .task-card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
 }
+
+/* ── Mobile Layout (≤ 640px) ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* Hide desktop sidebar */
+  .sidebar { display: none; }
+
+  /* Stack layout vertically */
+  .app { flex-direction: column; height: 100dvh; }
+  .main { flex: 1; min-height: 0; padding-bottom: 0; }
+
+  /* Compact topbar */
+  .topbar { padding: 10px 12px; gap: 8px; }
+  .topbar-title { font-size: 15px; }
+  .search-wrap { flex: 1; }
+  .search-wrap input { width: 100%; min-width: 0; }
+  .sync-indicator { font-size: 10px; padding: 3px 6px; white-space: nowrap; }
+
+  /* Hide filter bar priority label on mobile to save space */
+  .filterbar { padding: 6px 12px; gap: 5px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .filterbar::-webkit-scrollbar { display: none; }
+  .filterbar-label { display: none; }
+  .sort-select { margin-left: 0; font-size: 11px; }
+
+  /* Task list — leave room for bottom nav + quick-add */
+  .task-list { padding: 6px 12px; padding-bottom: 4px; }
+
+  /* Task cards — bigger tap targets */
+  .task-card { padding: 12px 10px; margin-bottom: 6px; }
+  .task-title { font-size: 14px; white-space: normal; }
+  .check-btn { width: 22px; height: 22px; min-width: 22px; }
+  /* Show task actions always on mobile (no hover) */
+  .task-actions { opacity: 1; }
+
+  /* Quick add — above bottom nav */
+  .quickadd { padding: 8px 12px 8px; gap: 8px; border-top: 1px solid var(--border); }
+  .quick-input { font-size: 14px; padding: 10px 12px; }
+  .btn-add { padding: 10px 14px; font-size: 13px; }
+
+  /* Modal */
+  .overlay { padding: 0; align-items: flex-end; }
+  .modal { width: 100% !important; border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 92dvh; }
+
+  /* ── Bottom Navigation Bar ── */
+  .mobile-bottom-nav {
+    display: flex;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+    z-index: 100;
+    flex-shrink: 0;
+  }
+  .mob-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 2px;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 10px;
+    font-weight: 500;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.1s;
+  }
+  .mob-nav-item.active { color: var(--accent); }
+  .mob-nav-icon { font-size: 18px; line-height: 1; }
+  .mob-nav-badge {
+    position: absolute;
+    top: 2px;
+    right: calc(50% - 16px);
+    background: var(--accent);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    font-family: var(--mono);
+  }
+
+  /* ── More Drawer (slides up from bottom) ── */
+  .mob-drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 150;
+  }
+  .mob-drawer-overlay.open { display: block; }
+  .mob-drawer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 0 0 max(16px, env(safe-area-inset-bottom));
+    max-height: 80dvh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+    z-index: 151;
+  }
+  .mob-drawer.open { transform: translateY(0); }
+  .mob-drawer-handle {
+    width: 36px; height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 12px auto 4px;
+  }
+  .mob-drawer-section { padding: 8px 12px 4px; }
+  .mob-drawer-label {
+    font-size: 10px; font-weight: 600; color: var(--text3);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0 4px 6px;
+  }
+  .mob-drawer-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 8px; border-radius: var(--radius);
+    cursor: pointer; color: var(--text2); font-size: 14px;
+    transition: all 0.1s;
+  }
+  .mob-drawer-item:active { background: var(--surface2); }
+  .mob-drawer-item.active { color: var(--accent-text); background: var(--accent-bg); font-weight: 500; }
+  .mob-drawer-item .mob-drawer-icon { font-size: 15px; width: 20px; text-align: center; }
+  .mob-drawer-item .mob-drawer-count {
+    margin-left: auto; font-size: 11px; font-family: var(--mono);
+    background: var(--surface2); color: var(--text3);
+    padding: 1px 7px; border-radius: 10px;
+  }
+  .mob-drawer-divider { height: 1px; background: var(--border); margin: 4px 16px; }
+}
+
+/* Hide bottom nav on desktop */
+.mobile-bottom-nav { display: none; }
+.mob-drawer-overlay { display: none; }
 </style>
 </head>
 <body>
@@ -259,6 +400,65 @@ textarea.form-input { resize: vertical; min-height: 70px; }
     <div class="quickadd">
       <input class="quick-input" id="quick-input" placeholder="Quick add — type task name and press Enter (assigns to first category, P4)" onkeydown="quickAdd(event)">
       <button class="btn-add" onclick="openNew()">+ New Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-bottom-nav" id="mob-bottom-nav">
+  <div class="mob-nav-item active" id="mobnav-all" onclick="mobNav('all')">
+    <span class="mob-nav-icon">⊞</span>
+    <span>All</span>
+    <span class="mob-nav-badge" id="mob-cnt-all">0</span>
+  </div>
+  <div class="mob-nav-item" id="mobnav-today" onclick="mobNav('today')">
+    <span class="mob-nav-icon">○</span>
+    <span>Today</span>
+    <span class="mob-nav-badge" id="mob-cnt-today" style="display:none">0</span>
+  </div>
+  <div class="mob-nav-item" id="mobnav-starred" onclick="mobNav('starred')">
+    <span class="mob-nav-icon">★</span>
+    <span>Starred</span>
+    <span class="mob-nav-badge" id="mob-cnt-starred" style="display:none">0</span>
+  </div>
+  <div class="mob-nav-item" id="mobnav-more" onclick="openMobDrawer()">
+    <span class="mob-nav-icon">☰</span>
+    <span>More</span>
+  </div>
+</nav>
+
+<!-- Mobile More Drawer -->
+<div class="mob-drawer-overlay" id="mob-drawer-overlay" onclick="closeMobDrawer()"></div>
+<div class="mob-drawer" id="mob-drawer">
+  <div class="mob-drawer-handle"></div>
+  <div class="mob-drawer-section">
+    <div class="mob-drawer-label">Views</div>
+    <div class="mob-drawer-item" data-mobview="top5" onclick="mobNavDrawer('top5')">
+      <span class="mob-drawer-icon">↑</span> Up Next 5
+    </div>
+    <div class="mob-drawer-item" data-mobview="top10" onclick="mobNavDrawer('top10')">
+      <span class="mob-drawer-icon">↑</span> Up Next 10
+    </div>
+    <div class="mob-drawer-item" data-mobview="completed" onclick="mobNavDrawer('completed')">
+      <span class="mob-drawer-icon">✓</span> Completed
+      <span class="mob-drawer-count" id="mob-cnt-done">0</span>
+    </div>
+  </div>
+  <div class="mob-drawer-divider"></div>
+  <div class="mob-drawer-section">
+    <div class="mob-drawer-label">Categories</div>
+    <div id="mob-cat-nav"></div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();showAddCat()">
+      <span class="mob-drawer-icon">+</span> Add category
+    </div>
+  </div>
+  <div class="mob-drawer-divider"></div>
+  <div class="mob-drawer-section">
+    <div class="mob-drawer-item" onclick="closeMobDrawer();exportCSV()">
+      <span class="mob-drawer-icon">↓</span> Export tasks
+    </div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();showImportModal()">
+      <span class="mob-drawer-icon">↑</span> Import tasks
     </div>
   </div>
 </div>
@@ -450,6 +650,7 @@ function render() {
   document.getElementById('cnt-today').textContent = active.filter(t=>isToday(t)||isOverdue(t)).length;
   document.getElementById('cnt-starred').textContent = active.filter(t=>t.pinned).length;
   document.getElementById('cnt-done').textContent = state.tasks.filter(t=>t.done).length;
+  updateMobBadges();
 
   const vmap = { all:'All Tasks', today:"Today's Tasks", starred:'Starred Tasks', top5:'Up Next — Top 5', top10:'Up Next — Top 10', top15:'Up Next — Top 15', completed:'Completed Tasks' };
   const vt = state.view.startsWith('cat-') ? getCatName(state.view.slice(4)) : (vmap[state.view] || 'Tasks');
@@ -505,7 +706,18 @@ function render() {
 }
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
-function setView(v) { state.view = v; render(); }
+function setView(v) {
+  state.view = v;
+  render();
+  // Sync mobile bottom nav active state
+  const mobViews = ['all', 'today', 'starred'];
+  mobViews.forEach(mv => {
+    const el = document.getElementById('mobnav-' + mv);
+    if (el) el.classList.toggle('active', mv === v);
+  });
+  const moreEl = document.getElementById('mobnav-more');
+  if (moreEl) moreEl.classList.toggle('active', !mobViews.includes(v));
+}
 
 function togglePF(p) {
   const i = state.priFilter.indexOf(p);
@@ -829,6 +1041,73 @@ async function confirmImport() {
   setSyncStatus('synced');
   render();
   showToast('Imported ' + imported + ' task' + (imported !== 1 ? 's' : '') + ' successfully');
+}
+
+// ── Mobile Navigation ─────────────────────────────────────────────────────────
+const MOB_NAV_VIEWS = ['all', 'today', 'starred'];
+
+function mobNav(view) {
+  setView(view);
+  // Update bottom nav active state
+  MOB_NAV_VIEWS.forEach(v => {
+    const el = document.getElementById('mobnav-' + v);
+    if (el) el.classList.toggle('active', v === view);
+  });
+  document.getElementById('mobnav-more').classList.remove('active');
+}
+
+function mobNavDrawer(view) {
+  setView(view);
+  closeMobDrawer();
+  // Mark "more" tab active when a drawer view is selected
+  MOB_NAV_VIEWS.forEach(v => {
+    const el = document.getElementById('mobnav-' + v);
+    if (el) el.classList.remove('active');
+  });
+  document.getElementById('mobnav-more').classList.add('active');
+}
+
+function openMobDrawer() {
+  document.getElementById('mob-drawer-overlay').classList.add('open');
+  document.getElementById('mob-drawer').classList.add('open');
+  // Refresh category list in drawer
+  const catNav = document.getElementById('mob-cat-nav');
+  catNav.innerHTML = state.cats.map(c => {
+    const cnt = state.tasks.filter(t => !t.done && t.category_id === c.id).length;
+    const isActive = state.view === 'cat-' + c.id;
+    return `<div class="mob-drawer-item${isActive ? ' active' : ''}" onclick="mobNavDrawer('cat-${c.id}')">
+      <span class="mob-drawer-icon">◦</span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.name)}</span>
+      <span class="mob-drawer-count">${cnt}</span>
+    </div>`;
+  }).join('');
+}
+
+function closeMobDrawer() {
+  document.getElementById('mob-drawer-overlay').classList.remove('open');
+  document.getElementById('mob-drawer').classList.remove('open');
+}
+
+// Patch setView to also sync mobile nav state
+const _origSetView = setView;
+// Override after definition — see patched setView below
+
+function updateMobBadges() {
+  const active = state.tasks.filter(t => !t.done);
+  const todayCnt = active.filter(t => isToday(t) || isOverdue(t)).length;
+  const starCnt = active.filter(t => t.pinned).length;
+  const doneCnt = state.tasks.filter(t => t.done).length;
+  const allCnt = active.length;
+
+  const allBadge = document.getElementById('mob-cnt-all');
+  const todayBadge = document.getElementById('mob-cnt-today');
+  const starBadge = document.getElementById('mob-cnt-starred');
+  const doneBadge = document.getElementById('mob-cnt-done');
+
+  if (allBadge) { allBadge.textContent = allCnt; allBadge.style.display = allCnt > 0 ? 'flex' : 'none'; }
+  if (todayBadge) { todayBadge.textContent = todayCnt; todayBadge.style.display = todayCnt > 0 ? 'flex' : 'none'; }
+  if (starBadge) { starBadge.textContent = starCnt; starBadge.style.display = starCnt > 0 ? 'flex' : 'none'; }
+  if (doneBadge) { doneBadge.textContent = doneCnt; }
 }
 
 loadData();
