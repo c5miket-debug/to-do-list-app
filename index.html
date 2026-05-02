@@ -40,10 +40,10 @@
   --radius: 8px;
   --radius-lg: 12px;
 }
-body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
 /* Layout */
-.app { display: flex; height: 100vh; overflow: hidden; }
+.app { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 .sidebar { width: 220px; min-width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
 
@@ -206,8 +206,8 @@ textarea.form-input { resize: vertical; min-height: 70px; }
   /* Hide desktop sidebar */
   .sidebar { display: none; }
 
-  /* Stack layout vertically */
-  .app { flex-direction: column; height: 100dvh; }
+  /* Stack layout vertically — body is already flex column */
+  .app { flex-direction: column; overflow: hidden; }
   .main { flex: 1; min-height: 0; padding-bottom: 0; }
 
   /* Compact topbar */
@@ -337,9 +337,12 @@ textarea.form-input { resize: vertical; min-height: 70px; }
   .mob-drawer-divider { height: 1px; background: var(--border); margin: 4px 16px; }
 }
 
-/* Hide bottom nav on desktop */
-.mobile-bottom-nav { display: none; }
-.mob-drawer-overlay { display: none; }
+/* Hide bottom nav and drawer on desktop — shown only via media query */
+@media (min-width: 641px) {
+  .mobile-bottom-nav { display: none !important; }
+  .mob-drawer-overlay { display: none !important; }
+  .mob-drawer { display: none !important; }
+}
 </style>
 </head>
 <body>
