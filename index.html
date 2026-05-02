@@ -164,6 +164,32 @@ textarea.form-input { resize: vertical; min-height: 70px; }
 /* Toast */
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 10px 16px; border-radius: var(--radius); font-size: 13px; z-index: 999; opacity: 0; transform: translateY(8px); transition: all 0.2s; pointer-events: none; }
 .toast.show { opacity: 1; transform: translateY(0); }
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111110;
+    --surface: #1c1c1a;
+    --surface2: #252523;
+    --border: #2e2e2b;
+    --border2: #3d3d39;
+    --text: #f0efe9;
+    --text2: #a09e97;
+    --text3: #6b6860;
+    --accent: #5b7ef5;
+    --accent-bg: #1a2240;
+    --accent-text: #8aaaf7;
+    --p1: #e05c5c; --p1bg: #2a1515; --p1t: #f09090;
+    --p2: #e8a030; --p2bg: #2a1f0a; --p2t: #f0c070;
+    --p3: #4a9fd4; --p3bg: #0e1f2e; --p3t: #80c4f0;
+    --p4: #8a9a99; --p4bg: #1a2020; --p4t: #aabcbb;
+    --success: #3dba6a; --success-bg: #0d2218;
+    --danger: #e05c5c; --danger-bg: #2a1515;
+    --warning: #e8a030; --warning-bg: #2a1f0a;
+  }
+  .modal { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+  .task-card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+}
 </style>
 </head>
 <body>
@@ -187,6 +213,10 @@ textarea.form-input { resize: vertical; min-height: 70px; }
       <div id="cat-nav"></div>
       <div class="add-cat" onclick="showAddCat()">+ add category</div>
     </div>
+    <div style="margin-top:auto;padding:12px 8px;border-top:1px solid var(--border)">
+      <div class="nav-item" onclick="exportCSV()"><span class="nav-icon">↓</span> Export tasks</div>
+      <div class="nav-item" onclick="showImportModal()"><span class="nav-icon">↑</span> Import tasks</div>
+    </div>
   </div>
 
   <div class="main">
@@ -197,7 +227,7 @@ textarea.form-input { resize: vertical; min-height: 70px; }
         <input type="text" placeholder="Search tasks..." id="search-input" oninput="render()">
       </div>
       <span class="sync-indicator" id="sync-status">synced</span>
-      <button class="topbar-btn" onclick="exportCSV()">↓ Export</button>
+      <input type="file" id="import-file-input" accept=".csv,.json" style="display:none" onchange="handleImportFile(event)">
     </div>
 
     <div class="filterbar">
@@ -661,7 +691,166 @@ function checkNotification(task) {
   else if (Notification.permission !== 'denied') Notification.requestPermission().then(p=>{ if(p==='granted') fire(); });
 }
 
+// ---- IMPORT ----
+let pendingImport = [];
+
+function triggerImport() {
+  document.getElementById('import-file-input').click();
+}
+
+function showImportModal() {
+  pendingImport = [];
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('import-confirm-btn').style.display = 'none';
+  document.getElementById('import-dropzone').style.display = 'block';
+  document.getElementById('import-modal').style.display = 'flex';
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('import-dropzone').style.borderColor = 'var(--border2)';
+  const file = e.dataTransfer.files[0];
+  if (file) processImportFile(file);
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (file) { showImportModal(); processImportFile(file); }
+  e.target.value = '';
+}
+
+function processImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;
+    try {
+      if (file.name.endsWith('.json')) {
+        pendingImport = parseImportJSON(content);
+      } else {
+        pendingImport = parseImportCSV(content);
+      }
+      showImportPreview(pendingImport);
+    } catch(err) {
+      showToast('Error reading file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function parseImportJSON(content) {
+  const data = JSON.parse(content);
+  const arr = Array.isArray(data) ? data : (data.tasks || []);
+  return arr.map(t => ({
+    title: t.title || 'Untitled',
+    category_name: t.category || t.category_name || '',
+    priority: parseInt(t.priority) || 4,
+    due_date: t.due_date || t.dueDate || null,
+    due_time: t.due_time || t.dueTime || null,
+    recur: t.recur || null,
+    notes: t.notes || null,
+    pinned: t.pinned === true || t.pinned === 'Yes',
+    done: t.done === true || t.done === 'Yes',
+    subtasks: Array.isArray(t.subtasks) ? t.subtasks : []
+  }));
+}
+
+function parseImportCSV(content) {
+  const lines = content.trim().split('\n');
+  if (lines.length < 2) throw new Error('CSV appears empty');
+  const headers = parseCSVRow(lines[0]).map(h => h.toLowerCase().trim());
+  const idx = (name) => headers.indexOf(name);
+  return lines.slice(1).filter(l=>l.trim()).map(line => {
+    const cols = parseCSVRow(line);
+    const get = (name) => (cols[idx(name)] || '').trim();
+    return {
+      title: get('title') || 'Untitled',
+      category_name: get('category'),
+      priority: parseInt(get('priority')) || 4,
+      due_date: get('due date') || null,
+      due_time: get('due time') || null,
+      recur: get('recurring') || null,
+      notes: get('notes') || null,
+      pinned: get('pinned').toLowerCase() === 'yes',
+      done: get('done').toLowerCase() === 'yes',
+      subtasks: get('subtasks') ? get('subtasks').split(';').filter(s=>s.trim()).map(s=>({title:s.trim(),done:false})) : []
+    };
+  });
+}
+
+function parseCSVRow(row) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < row.length; i++) {
+    const ch = row[i];
+    if (ch === '"') { if (inQ && row[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+    else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  result.push(cur);
+  return result;
+}
+
+function showImportPreview(tasks) {
+  document.getElementById('import-dropzone').style.display = 'none';
+  document.getElementById('import-preview').style.display = 'block';
+  document.getElementById('import-confirm-btn').style.display = 'inline-block';
+  const preview = tasks.slice(0, 8).map(t => t.title + ' [P' + t.priority + ']' + (t.category_name ? ' — ' + t.category_name : '')).join('\n');
+  document.getElementById('import-preview-content').textContent = preview + (tasks.length > 8 ? '\n...and ' + (tasks.length - 8) + ' more' : '');
+  document.getElementById('import-summary').textContent = 'Ready to import ' + tasks.length + ' task' + (tasks.length !== 1 ? 's' : '') + '.';
+}
+
+async function confirmImport() {
+  if (!pendingImport.length) return;
+  document.getElementById('import-modal').style.display = 'none';
+  setSyncStatus('syncing');
+  let imported = 0;
+  for (const t of pendingImport) {
+    let catId = null;
+    if (t.category_name) {
+      let cat = state.cats.find(c => c.name.toLowerCase() === t.category_name.toLowerCase());
+      if (!cat) {
+        const { data } = await sb.from('categories').insert([{ name: t.category_name }]).select();
+        if (data) { state.cats.push(data[0]); cat = data[0]; }
+      }
+      catId = cat ? cat.id : null;
+    }
+    const payload = { title: t.title, category_id: catId, priority: t.priority, due_date: t.due_date||null, due_time: t.due_time||null, recur: t.recur||null, notes: t.notes||null, pinned: t.pinned, done: t.done, subtasks: t.subtasks };
+    const { data, error } = await sb.from('tasks').insert([payload]).select();
+    if (!error && data) { state.tasks.push(data[0]); imported++; }
+  }
+  setSyncStatus('synced');
+  render();
+  showToast('Imported ' + imported + ' task' + (imported !== 1 ? 's' : '') + ' successfully');
+}
+
 loadData();
 </script>
+
+<!-- Import Modal -->
+<div class="overlay" id="import-modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="width:480px">
+    <div class="modal-header">
+      <div class="modal-title">Import Tasks</div>
+      <button class="close-btn" onclick="document.getElementById('import-modal').style.display='none'">x</button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+      Import tasks from a previously exported <strong>CSV</strong> or <strong>JSON</strong> file. Existing tasks will not be deleted — imported tasks are added on top.
+    </div>
+    <div id="import-preview" style="display:none">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Preview</div>
+      <div id="import-preview-content" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:12px;font-family:var(--mono);max-height:180px;overflow-y:auto;color:var(--text2)"></div>
+      <div style="margin-top:10px;font-size:13px;color:var(--text2)" id="import-summary"></div>
+    </div>
+    <div id="import-dropzone" style="border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:32px;text-align:center;color:var(--text3);cursor:pointer;transition:all 0.1s;margin-bottom:4px" onclick="triggerImport()" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border2)'" ondrop="handleDrop(event)">
+      <div style="font-size:28px;margin-bottom:8px">&#8679;</div>
+      <div style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:4px">Click to browse or drag and drop</div>
+      <div style="font-size:12px">Supports CSV (from Export) or JSON</div>
+    </div>
+    <div class="form-footer">
+      <button class="btn-sec" onclick="document.getElementById('import-modal').style.display='none'">Cancel</button>
+      <button class="btn-pri" id="import-confirm-btn" style="display:none" onclick="confirmImport()">Import Tasks</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
