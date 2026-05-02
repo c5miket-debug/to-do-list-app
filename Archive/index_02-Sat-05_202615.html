@@ -99,9 +99,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .task-title { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .task-card.done .task-title { text-decoration: line-through; color: var(--text3); }
 .task-card.overdue .task-title { color: var(--danger); }
-.star-icon { font-size: 13px; color: var(--text3); flex-shrink: 0; cursor: pointer; opacity: 0.4; transition: opacity 0.1s, color 0.1s; }
-.star-icon:hover { opacity: 1; }
-.star-icon.starred { color: var(--warning); opacity: 1; }
+.star-icon { font-size: 12px; color: var(--warning); flex-shrink: 0; }
 .task-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; font-family: var(--mono); }
 .p1-badge { background: var(--p1bg); color: var(--p1t); }
@@ -161,8 +159,6 @@ textarea.form-input { resize: vertical; min-height: 70px; }
 .subtask-add-row { display: flex; gap: 6px; margin-top: 6px; }
 .form-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
 .btn-sec { background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text); font-family: var(--font); transition: all 0.1s; }
-.btn-danger { background: none; border: 1px solid #e53935; border-radius: var(--radius); padding: 8px 16px; font-size: 13px; cursor: pointer; color: #e53935; font-family: var(--font); transition: all 0.1s; }
-.btn-danger:hover { background: #e53935; color: #fff; }
 .btn-sec:hover { border-color: var(--border2); background: var(--surface2); }
 .btn-pri { background: var(--accent); color: #fff; border: none; border-radius: var(--radius); padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: var(--font); font-weight: 500; }
 .btn-pri:hover { opacity: 0.88; }
@@ -542,22 +538,19 @@ textarea.form-input { resize: vertical; min-height: 70px; }
 </div>
 
 <!-- Category Modal -->
-<div class="overlay" id="cat-modal" style="display:none" onclick="if(event.target===this)closeCatModal()">
+<div class="overlay" id="cat-modal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal" style="width:340px">
     <div class="modal-header">
-      <div class="modal-title" id="cat-modal-title">Add Category</div>
-      <button class="close-btn" onclick="closeCatModal()">×</button>
+      <div class="modal-title">Add Category</div>
+      <button class="close-btn" onclick="document.getElementById('cat-modal').style.display='none'">×</button>
     </div>
     <div class="form-group">
       <label class="form-label">Category Name</label>
-      <input class="form-input" id="new-cat-input" placeholder="e.g. Work, Travel, Errands" onkeydown="if(event.key==='Enter')saveCat()">
+      <input class="form-input" id="new-cat-input" placeholder="e.g. Work, Travel, Errands" onkeydown="if(event.key==='Enter')addCat()">
     </div>
-    <div class="form-footer" style="justify-content:space-between">
-      <button class="btn-danger" id="cat-delete-btn" onclick="deleteCat()" style="display:none">Delete</button>
-      <div style="display:flex;gap:8px;margin-left:auto">
-        <button class="btn-sec" onclick="closeCatModal()">Cancel</button>
-        <button class="btn-pri" id="cat-save-btn" onclick="saveCat()">Add Category</button>
-      </div>
+    <div class="form-footer">
+      <button class="btn-sec" onclick="document.getElementById('cat-modal').style.display='none'">Cancel</button>
+      <button class="btn-pri" onclick="addCat()">Add Category</button>
     </div>
   </div>
 </div>
@@ -675,7 +668,6 @@ function render() {
     return `<div class="nav-item${isActive?' active':''}" onclick="setView('cat-${c.id}')">
       <span class="nav-icon">◦</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.name)}</span>
       <span class="nav-count">${cnt}</span>
-      <span onclick="event.stopPropagation();showEditCat('${c.id}')" title="Rename" style="margin-left:4px;opacity:0.4;cursor:pointer;font-size:11px" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.4">✎</span>
     </div>`;
   }).join('');
 
@@ -695,7 +687,7 @@ function render() {
     const catName = getCatName(t.category_id);
     return `<div class="task-card${ov?' overdue':''}${t.done?' done':''}" onclick="openEdit('${t.id}')">
       <div class="check-btn${t.done?' done':''}" onclick="event.stopPropagation();toggleDone('${t.id}')"></div>
-      <span class="star-icon${t.pinned?' starred':''}" onclick="event.stopPropagation();togglePin('${t.id}')" title="${t.pinned?'Unstar':'Star'}">${t.pinned?'★':'☆'}</span>
+      ${t.pinned?`<span class="star-icon" onclick="event.stopPropagation();togglePin('${t.id}')" title="Unstar">★</span>`:''}
       <div class="task-body">
         <div class="task-title-row">
           <span class="task-title">${esc(t.title)}</span>
@@ -883,82 +875,23 @@ async function quickAdd(e) {
   render();
 }
 
-let _editCatId = null;
-
-function closeCatModal() {
-  document.getElementById('cat-modal').style.display = 'none';
-  _editCatId = null;
-}
-
 function showAddCat() {
-  _editCatId = null;
-  document.getElementById('cat-modal-title').textContent = 'Add Category';
-  document.getElementById('cat-save-btn').textContent = 'Add Category';
-  document.getElementById('cat-delete-btn').style.display = 'none';
   document.getElementById('new-cat-input').value = '';
   document.getElementById('cat-modal').style.display = 'flex';
-  setTimeout(() => document.getElementById('new-cat-input').focus(), 60);
+  setTimeout(()=>document.getElementById('new-cat-input').focus(), 60);
 }
 
-function showEditCat(id) {
-  const cat = state.cats.find(c => c.id === id);
-  if (!cat) return;
-  _editCatId = id;
-  document.getElementById('cat-modal-title').textContent = 'Rename Category';
-  document.getElementById('cat-save-btn').textContent = 'Save';
-  document.getElementById('cat-delete-btn').style.display = 'block';
-  document.getElementById('new-cat-input').value = cat.name;
-  document.getElementById('cat-modal').style.display = 'flex';
-  setTimeout(() => {
-    const inp = document.getElementById('new-cat-input');
-    inp.focus(); inp.select();
-  }, 60);
-}
-
-async function saveCat() {
+async function addCat() {
   const v = document.getElementById('new-cat-input').value.trim();
   if (!v) return;
-  closeCatModal();
+  document.getElementById('cat-modal').style.display = 'none';
   setSyncStatus('syncing');
-  if (_editCatId) {
-    const { error } = await sb.from('categories').update({ name: v }).eq('id', _editCatId);
-    if (error) { setSyncStatus('error'); showToast('Error: ' + error.message); return; }
-    const cat = state.cats.find(c => c.id === _editCatId);
-    if (cat) cat.name = v;
-    showToast('Category renamed');
-  } else {
-    const { data, error } = await sb.from('categories').insert([{ name: v }]).select();
-    if (error) { setSyncStatus('error'); showToast('Error: ' + error.message); return; }
-    if (data) state.cats.push(data[0]);
-    showToast('Category added');
-  }
-  setSyncStatus('synced');
-  render();
-}
-
-async function deleteCat() {
-  if (!_editCatId) return;
-  const cat = state.cats.find(c => c.id === _editCatId);
-  const taskCount = state.tasks.filter(t => t.category_id === _editCatId).length;
-  const msg = taskCount > 0
-    ? `Delete "${cat.name}"? The ${taskCount} task(s) in this category will become uncategorized.`
-    : `Delete "${cat.name}"?`;
-  if (!confirm(msg)) return;
-  closeCatModal();
-  setSyncStatus('syncing');
-  const { error } = await sb.from('categories').delete().eq('id', _editCatId);
+  const { data, error } = await sb.from('categories').insert([{ name: v }]).select();
   if (error) { setSyncStatus('error'); showToast('Error: ' + error.message); return; }
-  state.cats = state.cats.filter(c => c.id !== _editCatId);
-  // Uncategorize affected tasks locally
-  state.tasks.forEach(t => { if (t.category_id === _editCatId) t.category_id = null; });
-  if (state.view === 'cat-' + _editCatId) setView('all');
+  if (data) state.cats.push(data[0]);
   setSyncStatus('synced');
-  showToast('Category deleted');
   render();
 }
-
-// keep addCat as alias for saveCat (used nowhere else but just in case)
-const addCat = saveCat;
 
 function exportCSV() {
   const rows = [['Title','Category','Priority','Due Date','Due Time','Recurring','Notes','Done','Pinned','Subtasks']];
@@ -1171,7 +1104,6 @@ function openMobDrawer() {
     return `<div class="mob-drawer-item${isActive ? ' active' : ''}" onclick="mobNavDrawer('cat-${c.id}')">
       <span class="mob-drawer-icon">◦</span>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.name)}</span>
-      <span onclick="event.stopPropagation();closeMobDrawer();showEditCat('${c.id}')" style="padding:4px 6px;opacity:0.5;font-size:13px">✎</span>
       <span class="mob-drawer-count">${cnt}</span>
     </div>`;
   }).join('');
