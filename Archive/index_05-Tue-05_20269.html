@@ -524,8 +524,7 @@ textarea.form-input { resize: vertical; min-height: 70px; }
       <div class="topbar-title" id="view-title">All Tasks</div>
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
-        <input type="text" placeholder="Search tasks..." id="search-input" oninput="render();document.getElementById('search-clear').style.display=this.value?'block':'none'">
-        <span id="search-clear" onclick="document.getElementById('search-input').value='';document.getElementById('search-clear').style.display='none';render()" style="display:none;cursor:pointer;color:var(--text3);font-size:14px;line-height:1;padding:0 2px" title="Clear">✕</span>
+        <input type="text" placeholder="Search tasks..." id="search-input" oninput="render()">
       </div>
       <span class="sync-indicator" id="sync-status">synced</span>
       <div class="user-menu-wrap">
@@ -533,8 +532,8 @@ textarea.form-input { resize: vertical; min-height: 70px; }
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dropdown-email" id="user-dropdown-email">—</div>
           <div class="user-dropdown-item" onclick="exportCSV()">↓ Export tasks</div>
-          <div class="user-dropdown-item" onclick="event.stopPropagation();closeUserMenu();showImportModal()">↑ Import tasks</div>
-          <div class="user-dropdown-item danger" onclick="event.stopPropagation();authSignOut()">Sign out</div>
+          <div class="user-dropdown-item" onclick="closeUserMenu();showImportModal()">↑ Import tasks</div>
+          <div class="user-dropdown-item danger" onclick="authSignOut()">Sign out</div>
         </div>
       </div>
       <input type="file" id="import-file-input" accept=".csv,.json" style="display:none" onchange="handleImportFile(event)">
@@ -1438,7 +1437,6 @@ async function authSignOut() {
   await sb.auth.signOut();
   currentUser = null;
   state.tasks = []; state.cats = [];
-  render();
   showAuthScreen();
 }
 
