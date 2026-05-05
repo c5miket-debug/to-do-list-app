@@ -42,110 +42,6 @@
 }
 body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* ── Auth Screen ─────────────────────────────────────────────────────────── */
-.auth-screen {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 999; padding: 24px;
-}
-.auth-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 36px 32px;
-  width: 100%; max-width: 380px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-}
-.auth-logo {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 20px; font-weight: 600; margin-bottom: 6px;
-}
-.auth-logo .logo-dot { width: 10px; height: 10px; }
-.auth-tagline { font-size: 13px; color: var(--text3); margin-bottom: 28px; }
-.auth-tabs {
-  display: flex; gap: 0; margin-bottom: 24px;
-  border: 1px solid var(--border); border-radius: var(--radius);
-  overflow: hidden;
-}
-.auth-tab {
-  flex: 1; padding: 8px; text-align: center; font-size: 13px;
-  font-weight: 500; cursor: pointer; color: var(--text2);
-  background: none; border: none; font-family: var(--font);
-  transition: all 0.15s;
-}
-.auth-tab.active { background: var(--accent); color: #fff; }
-.auth-field { margin-bottom: 14px; }
-.auth-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
-.auth-field input {
-  width: 100%; padding: 10px 12px; border: 1px solid var(--border);
-  border-radius: var(--radius); font-size: 14px; font-family: var(--font);
-  background: var(--bg); color: var(--text); outline: none; transition: border 0.1s;
-}
-.auth-field input:focus { border-color: var(--accent); }
-.auth-submit {
-  width: 100%; padding: 11px; background: var(--accent); color: #fff;
-  border: none; border-radius: var(--radius); font-size: 14px; font-weight: 500;
-  cursor: pointer; font-family: var(--font); margin-top: 4px;
-  transition: opacity 0.1s;
-}
-.auth-submit:hover { opacity: 0.88; }
-.auth-divider {
-  display: flex; align-items: center; gap: 10px;
-  margin: 18px 0; color: var(--text3); font-size: 12px;
-}
-.auth-divider::before, .auth-divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-.auth-google {
-  width: 100%; padding: 10px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: var(--radius);
-  font-size: 13px; font-weight: 500; cursor: pointer;
-  font-family: var(--font); color: var(--text); display: flex;
-  align-items: center; justify-content: center; gap: 8px;
-  transition: all 0.1s;
-}
-.auth-google:hover { border-color: var(--border2); background: var(--surface2); }
-.auth-google svg { width: 18px; height: 18px; flex-shrink: 0; }
-.auth-error {
-  background: var(--danger-bg); color: var(--danger); border: 1px solid #f5c6c6;
-  border-radius: var(--radius); padding: 10px 12px; font-size: 13px;
-  margin-bottom: 14px; display: none;
-}
-.auth-message {
-  background: var(--success-bg); color: var(--success); border: 1px solid #a9dfbf;
-  border-radius: var(--radius); padding: 10px 12px; font-size: 13px;
-  margin-bottom: 14px; display: none;
-}
-.auth-footer {
-  margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: 12px; color: var(--text3);
-}
-.auth-footer a { color: var(--accent); cursor: pointer; text-decoration: none; }
-
-/* User menu in topbar */
-.user-menu-wrap { position: relative; }
-.user-avatar {
-  width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
-  color: #fff; font-size: 11px; font-weight: 600; display: flex;
-  align-items: center; justify-content: center; cursor: pointer;
-  flex-shrink: 0; border: 2px solid transparent; transition: border-color 0.1s;
-}
-.user-avatar:hover { border-color: var(--accent); }
-.user-dropdown {
-  position: absolute; right: 0; top: 36px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: var(--radius-lg);
-  padding: 6px; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  display: none; z-index: 200;
-}
-.user-dropdown.open { display: block; }
-.user-dropdown-email { padding: 8px 10px; font-size: 12px; color: var(--text3); border-bottom: 1px solid var(--border); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.user-dropdown-item {
-  padding: 8px 10px; border-radius: var(--radius); cursor: pointer;
-  font-size: 13px; color: var(--text2); transition: all 0.1s;
-}
-.user-dropdown-item:hover { background: var(--surface2); color: var(--text); }
-.user-dropdown-item.danger { color: var(--danger); }
-.user-dropdown-item.danger:hover { background: var(--danger-bg); }
-
 /* Layout */
 .app { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 .sidebar { width: 220px; min-width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
@@ -455,45 +351,6 @@ textarea.form-input { resize: vertical; min-height: 70px; }
 </head>
 <body>
 
-<!-- ── Auth Screen ──────────────────────────────────────────────────────────── -->
-<div class="auth-screen" id="auth-screen">
-  <div class="auth-card">
-    <div class="auth-logo"><div class="logo-dot"></div> TaskFlow</div>
-    <div class="auth-tagline">Your tasks, everywhere.</div>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
-      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
-    </div>
-
-    <div class="auth-error" id="auth-error"></div>
-    <div class="auth-message" id="auth-message"></div>
-
-    <div class="auth-field">
-      <label>Email</label>
-      <input type="email" id="auth-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')authSubmit()">
-    </div>
-    <div class="auth-field" id="auth-pw-field">
-      <label>Password</label>
-      <input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()">
-    </div>
-
-    <button class="auth-submit" id="auth-submit-btn" onclick="authSubmit()">Sign In</button>
-
-    <div class="auth-divider">or</div>
-
-    <button class="auth-google" onclick="authGoogle()">
-      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      Continue with Google
-    </button>
-
-    <div class="auth-footer">
-      <span id="auth-footer-text">Don't have an account? <a onclick="switchAuthTab('signup')">Sign up</a></span>
-      <a id="auth-forgot" onclick="authForgot()">Forgot password?</a>
-    </div>
-  </div>
-</div>
-
 <div class="app">
   <div class="sidebar">
     <div class="sidebar-logo"><div class="logo-dot"></div> TaskFlow</div>
@@ -527,15 +384,6 @@ textarea.form-input { resize: vertical; min-height: 70px; }
         <input type="text" placeholder="Search tasks..." id="search-input" oninput="render()">
       </div>
       <span class="sync-indicator" id="sync-status">synced</span>
-      <div class="user-menu-wrap">
-        <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu()">?</div>
-        <div class="user-dropdown" id="user-dropdown">
-          <div class="user-dropdown-email" id="user-dropdown-email">—</div>
-          <div class="user-dropdown-item" onclick="exportCSV()">↓ Export tasks</div>
-          <div class="user-dropdown-item" onclick="closeUserMenu();showImportModal()">↑ Import tasks</div>
-          <div class="user-dropdown-item danger" onclick="authSignOut()">Sign out</div>
-        </div>
-      </div>
       <input type="file" id="import-file-input" accept=".csv,.json" style="display:none" onchange="handleImportFile(event)">
     </div>
 
@@ -1000,8 +848,7 @@ async function saveTask() {
     recur: document.getElementById('f-recur').value || null,
     notes: document.getElementById('f-notes').value || null,
     pinned: getFormPin(),
-    subtasks: state.formSubtasks,
-    user_id: currentUser?.id
+    subtasks: state.formSubtasks
   };
   closeModal();
   setSyncStatus('syncing');
@@ -1029,7 +876,7 @@ async function quickAdd(e) {
   const catId = state.cats[0]?.id || null;
   document.getElementById('quick-input').value = '';
   setSyncStatus('syncing');
-  const { data, error } = await sb.from('tasks').insert([{ title: v, category_id: catId, priority: 4, done: false, pinned: false, subtasks: [], user_id: currentUser?.id }]).select();
+  const { data, error } = await sb.from('tasks').insert([{ title: v, category_id: catId, priority: 4, done: false, pinned: false, subtasks: [] }]).select();
   if (error) { setSyncStatus('error'); showToast('Error: ' + error.message); return; }
   if (data) state.tasks.push(data[0]);
   setSyncStatus('synced');
@@ -1080,7 +927,7 @@ async function saveCat() {
     if (cat) cat.name = v;
     showToast('Category renamed');
   } else {
-    const { data, error } = await sb.from('categories').insert([{ name: v, user_id: currentUser?.id }]).select();
+    const { data, error } = await sb.from('categories').insert([{ name: v }]).select();
     if (error) { setSyncStatus('error'); showToast('Error: ' + error.message); return; }
     if (data) state.cats.push(data[0]);
     showToast('Category added');
@@ -1251,12 +1098,12 @@ async function confirmImport() {
     if (t.category_name) {
       let cat = state.cats.find(c => c.name.toLowerCase() === t.category_name.toLowerCase());
       if (!cat) {
-        const { data } = await sb.from('categories').insert([{ name: t.category_name, user_id: currentUser?.id }]).select();
+        const { data } = await sb.from('categories').insert([{ name: t.category_name }]).select();
         if (data) { state.cats.push(data[0]); cat = data[0]; }
       }
       catId = cat ? cat.id : null;
     }
-    const payload = { title: t.title, category_id: catId, priority: t.priority, due_date: t.due_date||null, due_time: t.due_time||null, recur: t.recur||null, notes: t.notes||null, pinned: t.pinned, done: t.done, subtasks: t.subtasks, user_id: currentUser?.id };
+    const payload = { title: t.title, category_id: catId, priority: t.priority, due_date: t.due_date||null, due_time: t.due_time||null, recur: t.recur||null, notes: t.notes||null, pinned: t.pinned, done: t.done, subtasks: t.subtasks };
     const { data, error } = await sb.from('tasks').insert([payload]).select();
     if (!error && data) { state.tasks.push(data[0]); imported++; }
   }
@@ -1357,128 +1204,7 @@ function updateMobBadges() {
   if (doneBadge) { doneBadge.textContent = doneCnt; }
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
-let currentUser = null;
-
-function showAuthScreen() {
-  document.getElementById('auth-screen').style.display = 'flex';
-}
-function hideAuthScreen() {
-  document.getElementById('auth-screen').style.display = 'none';
-}
-
-function switchAuthTab(tab) {
-  const isSignIn = tab === 'signin';
-  document.getElementById('tab-signin').classList.toggle('active', isSignIn);
-  document.getElementById('tab-signup').classList.toggle('active', !isSignIn);
-  document.getElementById('auth-submit-btn').textContent = isSignIn ? 'Sign In' : 'Create Account';
-  document.getElementById('auth-footer-text').innerHTML = isSignIn
-    ? 'Don\'t have an account? <a onclick="switchAuthTab(\'signup\')">Sign up</a>'
-    : 'Already have an account? <a onclick="switchAuthTab(\'signin\')">Sign in</a>';
-  document.getElementById('auth-forgot').style.display = isSignIn ? '' : 'none';
-  clearAuthMessages();
-}
-
-function clearAuthMessages() {
-  const err = document.getElementById('auth-error');
-  const msg = document.getElementById('auth-message');
-  err.style.display = 'none'; err.textContent = '';
-  msg.style.display = 'none'; msg.textContent = '';
-}
-function showAuthError(text) {
-  const el = document.getElementById('auth-error');
-  el.textContent = text; el.style.display = 'block';
-  document.getElementById('auth-message').style.display = 'none';
-}
-function showAuthMessage(text) {
-  const el = document.getElementById('auth-message');
-  el.textContent = text; el.style.display = 'block';
-  document.getElementById('auth-error').style.display = 'none';
-}
-
-async function authSubmit() {
-  const email = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-  const isSignIn = document.getElementById('tab-signin').classList.contains('active');
-  clearAuthMessages();
-  if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
-  const btn = document.getElementById('auth-submit-btn');
-  btn.textContent = '...'; btn.disabled = true;
-  if (isSignIn) {
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) { showAuthError(error.message); btn.textContent = 'Sign In'; btn.disabled = false; }
-  } else {
-    const { error } = await sb.auth.signUp({ email, password });
-    if (error) { showAuthError(error.message); btn.textContent = 'Create Account'; btn.disabled = false; }
-    else { showAuthMessage('Check your email for a confirmation link, then sign in.'); btn.textContent = 'Create Account'; btn.disabled = false; }
-  }
-}
-
-async function authGoogle() {
-  clearAuthMessages();
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.origin }
-  });
-  if (error) showAuthError(error.message);
-}
-
-async function authForgot() {
-  const email = document.getElementById('auth-email').value.trim();
-  if (!email) { showAuthError('Enter your email address above first.'); return; }
-  clearAuthMessages();
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
-  if (error) showAuthError(error.message);
-  else showAuthMessage('Password reset email sent — check your inbox.');
-}
-
-async function authSignOut() {
-  closeUserMenu();
-  await sb.auth.signOut();
-  currentUser = null;
-  state.tasks = []; state.cats = [];
-  showAuthScreen();
-}
-
-function setUserUI(user) {
-  currentUser = user;
-  const initial = (user.email || '?')[0].toUpperCase();
-  document.getElementById('user-avatar').textContent = initial;
-  document.getElementById('user-dropdown-email').textContent = user.email;
-}
-
-function toggleUserMenu() {
-  document.getElementById('user-dropdown').classList.toggle('open');
-}
-function closeUserMenu() {
-  document.getElementById('user-dropdown').classList.remove('open');
-}
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.user-menu-wrap')) closeUserMenu();
-});
-
-// ── Bootstrap: listen for auth state ─────────────────────────────────────────
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (session?.user) {
-    setUserUI(session.user);
-    hideAuthScreen();
-    await loadData();
-  } else {
-    showAuthScreen();
-  }
-});
-
-// Check for existing session on load (handles page refresh)
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) {
-    setUserUI(session.user);
-    hideAuthScreen();
-    await loadData();
-  } else {
-    showAuthScreen();
-  }
-})();
+loadData();
 
 // ── PWA: Register Service Worker ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
