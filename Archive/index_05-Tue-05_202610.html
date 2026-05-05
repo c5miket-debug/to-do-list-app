@@ -1459,41 +1459,28 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('.user-menu-wrap')) closeUserMenu();
 });
 
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
-// Single entry point — getSession on load, onAuthStateChange for sign-in/out events
-let _appReady = false;
-
-(async () => {
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) {
-      setUserUI(session.user);
-      hideAuthScreen();
-      await loadData();
-    } else {
-      showAuthScreen();
-    }
-  } catch(e) {
-    console.error('Session check failed:', e);
-    showAuthScreen();
-  }
-  _appReady = true;
-})();
-
-// Only handle sign-in and sign-out events AFTER initial load
+// ── Bootstrap: listen for auth state ─────────────────────────────────────────
 sb.auth.onAuthStateChange(async (event, session) => {
-  if (!_appReady) return; // ignore the initial INITIAL_SESSION event
-  if (event === 'SIGNED_IN' && session?.user) {
+  if (session?.user) {
     setUserUI(session.user);
     hideAuthScreen();
     await loadData();
-  } else if (event === 'SIGNED_OUT') {
-    currentUser = null;
-    state.tasks = []; state.cats = [];
-    render();
+  } else {
     showAuthScreen();
   }
 });
+
+// Check for existing session on load (handles page refresh)
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    setUserUI(session.user);
+    hideAuthScreen();
+    await loadData();
+  } else {
+    showAuthScreen();
+  }
+})();
 
 // ── PWA: Register Service Worker ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
