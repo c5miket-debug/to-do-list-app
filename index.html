@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="device">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,20 +13,21 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TaskFlow">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
+<script>document.documentElement.setAttribute('data-theme',localStorage.getItem('tf-theme')||'device')</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #f7f6f3;
+  --bg: #f0f2f8;
   --surface: #ffffff;
-  --surface2: #f0efe9;
-  --border: #e4e2da;
-  --border2: #d0cec4;
-  --text: #1a1917;
-  --text2: #6b6860;
-  --text3: #a09e97;
-  --accent: #2d5be3;
-  --accent-bg: #eef2fd;
+  --surface2: #e8ebf4;
+  --border: #dde1ee;
+  --border2: #c8cde0;
+  --text: #1a1d2e;
+  --text2: #5a6080;
+  --text3: #9399b8;
+  --accent: #3d52d5;
+  --accent-bg: #eef1fd;
   --accent-text: #1a3fa8;
   --p1: #c0392b; --p1bg: #fdf0ef; --p1t: #922b21;
   --p2: #d68910; --p2bg: #fef9ec; --p2t: #9a6310;
@@ -39,6 +40,50 @@
   --mono: 'DM Mono', monospace;
   --radius: 8px;
   --radius-lg: 12px;
+}
+/* Dark theme */
+[data-theme="dark"] {
+  --bg: #13151f;
+  --surface: #1a1d2e;
+  --surface2: #222640;
+  --border: #2e3354;
+  --border2: #3a4068;
+  --text: #e8eaf8;
+  --text2: #9399b8;
+  --text3: #5a6080;
+  --accent: #6b82f0;
+  --accent-bg: #1e2240;
+  --accent-text: #a0b0f8;
+  --p1: #e74c3c; --p1bg: #2a1518; --p1t: #f08070;
+  --p2: #e6a817; --p2bg: #2a2010; --p2t: #f0c060;
+  --p3: #5ba3d0; --p3bg: #102030; --p3t: #80c0e8;
+  --p4: #8899a0; --p4bg: #1e2428; --p4t: #aabbcc;
+  --success: #2ecc71; --success-bg: #0e2818;
+  --danger: #e74c3c; --danger-bg: #2a1518;
+  --warning: #e6a817; --warning-bg: #2a2010;
+}
+/* Device/auto theme */
+@media (prefers-color-scheme: dark) {
+  [data-theme="device"] {
+    --bg: #13151f;
+    --surface: #1a1d2e;
+    --surface2: #222640;
+    --border: #2e3354;
+    --border2: #3a4068;
+    --text: #e8eaf8;
+    --text2: #9399b8;
+    --text3: #5a6080;
+    --accent: #6b82f0;
+    --accent-bg: #1e2240;
+    --accent-text: #a0b0f8;
+    --p1: #e74c3c; --p1bg: #2a1518; --p1t: #f08070;
+    --p2: #e6a817; --p2bg: #2a2010; --p2t: #f0c060;
+    --p3: #5ba3d0; --p3bg: #102030; --p3t: #80c0e8;
+    --p4: #8899a0; --p4bg: #1e2428; --p4t: #aabbcc;
+    --success: #2ecc71; --success-bg: #0e2818;
+    --danger: #e74c3c; --danger-bg: #2a1518;
+    --warning: #e6a817; --warning-bg: #2a2010;
+  }
 }
 body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
@@ -191,9 +236,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .task-list { flex: 1; overflow-y: auto; padding: 8px 20px; }
 .task-group-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; padding: 12px 0 6px; }
 .task-card { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 4px; cursor: pointer; transition: all 0.1s; }
-.task-card:hover { border-color: var(--border2); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.task-card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(61,82,213,0.08); }
 .task-card.overdue { border-left: 3px solid var(--danger); }
-.task-card.done { opacity: 0.55; }
+.task-card.done { opacity: 0.45; background: var(--surface2); }
 .check-btn { width: 18px; height: 18px; min-width: 18px; border-radius: 50%; border: 1.5px solid var(--border2); margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: none; }
 .check-btn:hover { border-color: var(--success); background: var(--success-bg); }
 .check-btn.done { background: var(--success); border-color: var(--success); }
@@ -201,7 +246,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .task-body { flex: 1; min-width: 0; }
 .task-title-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
 .task-title { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.task-card.done .task-title { text-decoration: line-through; color: var(--text3); }
+.task-card.done .task-title { text-decoration: line-through; color: var(--text3); font-weight: 400; }
 .task-card.overdue .task-title { color: var(--danger); }
 .star-icon { font-size: 13px; color: var(--text3); flex-shrink: 0; cursor: pointer; opacity: 0.4; transition: opacity 0.1s, color 0.1s; }
 .star-icon:hover { opacity: 1; }
@@ -305,8 +350,61 @@ textarea.form-input { resize: vertical; min-height: 70px; }
     --warning: #e8a030; --warning-bg: #2a1f0a;
   }
   .modal { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-  .task-card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+  .task-card:hover { box-shadow: 0 2px 8px rgba(107,130,240,0.15); }
 }
+
+/* ── Ticker Widget ───────────────────────────────────────────────────────── */
+.ticker-wrap {
+  padding: 10px 8px 8px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.ticker-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 4px 6px;
+}
+.ticker-label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; }
+.ticker-time { font-size: 9px; color: var(--text3); font-family: var(--mono); }
+.ticker-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 3px 4px; border-radius: 6px;
+}
+.ticker-item:hover { background: var(--surface2); }
+.ticker-sym { font-size: 10px; font-weight: 600; color: var(--text2); font-family: var(--mono); width: 42px; flex-shrink: 0; }
+.ticker-price { font-size: 10px; color: var(--text); font-family: var(--mono); flex: 1; text-align: right; }
+.ticker-chg { font-size: 10px; font-family: var(--mono); width: 46px; text-align: right; flex-shrink: 0; }
+.ticker-chg.up { color: var(--success); }
+.ticker-chg.dn { color: var(--danger); }
+.ticker-chg.flat { color: var(--text3); }
+.ticker-loading { font-size: 10px; color: var(--text3); text-align: center; padding: 6px 0; }
+.ticker-refresh { cursor: pointer; font-size: 10px; color: var(--text3); padding: 2px 4px; border-radius: 4px; }
+.ticker-refresh:hover { color: var(--accent); background: var(--accent-bg); }
+
+/* ── Settings Modal ──────────────────────────────────────────────────────── */
+.settings-section { margin-bottom: 20px; }
+.settings-section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+.theme-options { display: flex; gap: 8px; }
+.theme-opt {
+  flex: 1; padding: 10px 8px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); cursor: pointer; text-align: center;
+  font-size: 12px; color: var(--text2); background: var(--surface);
+  transition: all 0.15s; font-family: var(--font);
+}
+.theme-opt:hover { border-color: var(--accent); color: var(--text); }
+.theme-opt.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent-text); font-weight: 500; }
+.theme-opt-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+.ticker-config { display: flex; flex-direction: column; gap: 6px; }
+.ticker-config-row { display: flex; align-items: center; gap: 8px; }
+.ticker-config-row input { flex: 1; }
+.ticker-config-add { display: flex; gap: 6px; margin-top: 4px; }
+.ticker-config-add input { flex: 1; }
+.ticker-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; background: var(--accent-bg); color: var(--accent-text);
+  border-radius: 20px; font-size: 11px; font-weight: 500; font-family: var(--mono);
+}
+.ticker-tag-remove { cursor: pointer; opacity: 0.5; font-size: 12px; }
+.ticker-tag-remove:hover { opacity: 1; }
 
 /* ── Mobile Layout (≤ 640px) ─────────────────────────────────────────────── */
 @media (max-width: 640px) {
@@ -499,8 +597,8 @@ textarea.form-input { resize: vertical; min-height: 70px; }
     <div class="sidebar-logo"><div class="logo-dot"></div> TaskFlow</div>
     <div class="sidebar-section">
       <div class="sidebar-label">Views</div>
-      <div class="nav-item active" data-view="all" onclick="setView('all')"><span class="nav-icon">⊞</span> All Tasks <span class="nav-count" id="cnt-all">0</span></div>
-      <div class="nav-item" data-view="today" onclick="setView('today')"><span class="nav-icon">○</span> Today <span class="nav-count" id="cnt-today">0</span></div>
+      <div class="nav-item" data-view="all" onclick="setView('all')"><span class="nav-icon">⊞</span> All Tasks <span class="nav-count" id="cnt-all">0</span></div>
+      <div class="nav-item active" data-view="today" onclick="setView('today')"><span class="nav-icon">○</span> Today <span class="nav-count" id="cnt-today">0</span></div>
       <div class="nav-item" data-view="starred" onclick="setView('starred')"><span class="nav-icon">★</span> Starred <span class="nav-count" id="cnt-starred">0</span></div>
       <div class="nav-item" data-view="top5" onclick="setView('top5')"><span class="nav-icon">↑</span> Up Next 5</div>
       <div class="nav-item" data-view="top10" onclick="setView('top10')"><span class="nav-icon">↑</span> Up Next 10</div>
@@ -513,9 +611,21 @@ textarea.form-input { resize: vertical; min-height: 70px; }
       <div id="cat-nav"></div>
       <div class="add-cat" onclick="showAddCat()">+ add category</div>
     </div>
-    <div style="margin-top:auto;padding:12px 8px;border-top:1px solid var(--border)">
+
+    <!-- Ticker Widget -->
+    <div class="ticker-wrap" id="ticker-wrap">
+      <div class="ticker-header">
+        <span class="ticker-label">Markets</span>
+        <span class="ticker-refresh" onclick="fetchTickers()" title="Refresh">↻</span>
+        <span class="ticker-time" id="ticker-time"></span>
+      </div>
+      <div id="ticker-list"><div class="ticker-loading">Loading...</div></div>
+    </div>
+
+    <div style="padding:8px;border-top:1px solid var(--border);flex-shrink:0">
       <div class="nav-item" onclick="exportCSV()"><span class="nav-icon">↓</span> Export tasks</div>
       <div class="nav-item" onclick="showImportModal()"><span class="nav-icon">↑</span> Import tasks</div>
+      <div class="nav-item" onclick="showSettings()"><span class="nav-icon">⚙</span> Settings</div>
     </div>
   </div>
 
@@ -715,6 +825,42 @@ textarea.form-input { resize: vertical; min-height: 70px; }
   </div>
 </div>
 
+<!-- Settings Modal -->
+<div class="overlay" id="settings-modal" style="display:none" onclick="if(event.target===this)closeSettings()">
+  <div class="modal" style="width:420px">
+    <div class="modal-header">
+      <div class="modal-title">Settings</div>
+      <button class="close-btn" onclick="closeSettings()">×</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Appearance</div>
+      <div class="theme-options">
+        <button class="theme-opt" data-theme="light" onclick="setTheme('light')">
+          <span class="theme-opt-icon">☀️</span> Light
+        </button>
+        <button class="theme-opt" data-theme="dark" onclick="setTheme('dark')">
+          <span class="theme-opt-icon">🌙</span> Dark
+        </button>
+        <button class="theme-opt active" data-theme="device" onclick="setTheme('device')">
+          <span class="theme-opt-icon">💻</span> Device
+        </button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Market Tickers</div>
+      <div id="ticker-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+      <div class="ticker-config-add">
+        <input class="form-input" id="ticker-add-input" placeholder="Add symbol e.g. AAPL" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')addTickerSymbol()">
+        <button class="btn-pri" onclick="addTickerSymbol()">Add</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px">Prices from Yahoo Finance · ~15 min delayed for stocks · near real-time for crypto (BTC-USD, SOL-USD)</div>
+    </div>
+    <div class="form-footer">
+      <button class="btn-sec" onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -723,7 +869,7 @@ const SUPA_URL = 'https://vjrxzxypctkecfzlwnjs.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcnh6eHlwY3RrZWNmemx3bmpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDA2NTQsImV4cCI6MjA5MzI3NjY1NH0.N6FDP9a9jMP3Cx2lR3a5IGY5_ubl0S57_7o4pve_IvU';
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-let state = { tasks: [], cats: [], view: 'all', priFilter: [], editId: null, formPrio: 4, formSubtasks: [] };
+let state = { tasks: [], cats: [], view: 'today', priFilter: [], editId: null, formPrio: 4, formSubtasks: [] };
 
 function setSyncStatus(s) {
   const el = document.getElementById('sync-status');
@@ -786,7 +932,7 @@ function getFiltered() {
   let tasks = state.tasks.filter(t => {
     if (state.view === 'completed') return t.done;
     if (t.done) return false;
-    if (state.view === 'today') return isToday(t) || isOverdue(t);
+    if (state.view === 'today') return isToday(t) || isOverdue(t) || t.pinned;
     if (state.view === 'starred') return t.pinned;
     if (state.view.startsWith('cat-')) return t.category_id === state.view.slice(4);
     return true;
@@ -815,7 +961,7 @@ function render() {
   document.getElementById('cnt-done').textContent = state.tasks.filter(t=>t.done).length;
   updateMobBadges();
 
-  const vmap = { all:'All Tasks', today:"Today's Tasks", starred:'Starred Tasks', top5:'Up Next — Top 5', top10:'Up Next — Top 10', top15:'Up Next — Top 15', completed:'Completed Tasks' };
+  const vmap = { all:'All Tasks', today:"Today", starred:'Starred Tasks', top5:'Up Next — Top 5', top10:'Up Next — Top 10', top15:'Up Next — Top 15', completed:'Completed Tasks' };
   const vt = state.view.startsWith('cat-') ? getCatName(state.view.slice(4)) : (vmap[state.view] || 'Tasks');
   document.getElementById('view-title').textContent = vt;
 
@@ -832,14 +978,35 @@ function render() {
     </div>`;
   }).join('');
 
-  const tasks = getFiltered();
   const list = document.getElementById('task-list');
+
+  // Quote banner for today view
+  if (state.view === 'today') {
+    const today = new Date().toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+    const q = getDailyQuote();
+    const overdueCount = state.tasks.filter(t=>!t.done && isOverdue(t)).length;
+    const overdueNote = overdueCount > 0 ? `<span style="font-size:11px;color:var(--danger);margin-left:8px">● ${overdueCount} overdue</span>` : '';
+    list.innerHTML = `<div style="margin-bottom:12px">
+      <div style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:2px">${today}${overdueNote}</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-lg);padding:10px 14px;margin-top:8px">
+        <div style="font-size:12px;color:var(--text2);line-height:1.5;font-style:italic">"${esc(q.text)}"</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">— ${esc(q.author)}</div>
+      </div>
+    </div>` + renderTaskList(getFiltered());
+    return;
+  }
+
+  const tasks = getFiltered();
   if (!tasks.length) {
     list.innerHTML = `<div class="empty"><div class="empty-icon">✓</div><div style="font-weight:500">No tasks here</div><div style="font-size:12px">Add one below or try a different filter</div></div>`;
     return;
   }
+  list.innerHTML = renderTaskList(tasks);
+}
 
-  list.innerHTML = tasks.map(t => {
+function renderTaskList(tasks) {
+  if (!tasks.length) return `<div class="empty"><div class="empty-icon">✓</div><div style="font-weight:500">No tasks here</div><div style="font-size:12px">Add one below or try a different filter</div></div>`;
+  return tasks.map(t => {
     const ov = isOverdue(t);
     const td = isToday(t);
     const due = fmtDue(t);
@@ -1290,6 +1457,146 @@ function toggleFormPin() {
   setFormPin(!getFormPin());
 }
 
+// ── Daily Quote ───────────────────────────────────────────────────────────────
+const QUOTES = [
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+  { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
+  { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+  { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
+  { text: "Well done is better than well said.", author: "Benjamin Franklin" },
+  { text: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "Do something today that your future self will thank you for.", author: "Sean Patrick Flanery" },
+  { text: "Small steps in the right direction can turn out to be the biggest step of your life.", author: "Unknown" },
+  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+  { text: "Your time is limited, don't waste it living someone else's life.", author: "Steve Jobs" },
+  { text: "The key is not to prioritize what's on your schedule, but to schedule your priorities.", author: "Stephen Covey" },
+  { text: "Done is better than perfect.", author: "Sheryl Sandberg" },
+  { text: "Productivity is never an accident. It is always the result of a commitment to excellence.", author: "Paul J. Meyer" },
+  { text: "You are never too old to set another goal or dream a new dream.", author: "C.S. Lewis" },
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
+  { text: "If you spend too much time thinking about a thing, you'll never get it done.", author: "Bruce Lee" },
+  { text: "Either you run the day, or the day runs you.", author: "Jim Rohn" },
+  { text: "Yesterday is gone. Tomorrow has not yet come. We have only today.", author: "Mother Teresa" },
+  { text: "The most difficult thing is the decision to act, the rest is merely tenacity.", author: "Amelia Earhart" },
+  { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+  { text: "Don't count the days, make the days count.", author: "Muhammad Ali" },
+  { text: "It's not about having time. It's about making time.", author: "Unknown" },
+  { text: "Amateurs sit and wait for inspiration, the rest of us just show up and get to work.", author: "Stephen King" },
+  { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+  { text: "If you want to live a happy life, tie it to a goal, not to people or things.", author: "Albert Einstein" },
+  { text: "Nothing will work unless you do.", author: "Maya Angelou" },
+];
+function getDailyQuote() {
+  const day = Math.floor(Date.now() / 86400000);
+  return QUOTES[day % QUOTES.length];
+}
+
+// ── Theme ─────────────────────────────────────────────────────────────────────
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('tf-theme', theme);
+  document.querySelectorAll('.theme-opt').forEach(el => {
+    el.classList.toggle('active', el.dataset.theme === theme);
+  });
+}
+function setTheme(theme) { applyTheme(theme); }
+// Apply saved theme on load
+applyTheme(localStorage.getItem('tf-theme') || 'device');
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+function showSettings() {
+  renderTickerTags();
+  document.getElementById('settings-modal').style.display = 'flex';
+  const saved = localStorage.getItem('tf-theme') || 'device';
+  document.querySelectorAll('.theme-opt').forEach(el => el.classList.toggle('active', el.dataset.theme === saved));
+}
+function closeSettings() {
+  document.getElementById('settings-modal').style.display = 'none';
+  fetchTickers();
+}
+
+// ── Ticker ────────────────────────────────────────────────────────────────────
+const DEFAULT_TICKERS = ['TSLA', 'MSTR', 'GOOG', 'AMZN', 'PLTR', 'BTC-USD', 'SOL-USD'];
+
+function getTickerSymbols() {
+  const saved = localStorage.getItem('tf-tickers');
+  return saved ? JSON.parse(saved) : DEFAULT_TICKERS;
+}
+function saveTickerSymbols(syms) {
+  localStorage.setItem('tf-tickers', JSON.stringify(syms));
+}
+
+function renderTickerTags() {
+  const syms = getTickerSymbols();
+  document.getElementById('ticker-tags').innerHTML = syms.map(s =>
+    `<span class="ticker-tag">${esc(s)} <span class="ticker-tag-remove" onclick="removeTickerSymbol('${s}')">×</span></span>`
+  ).join('');
+}
+
+function addTickerSymbol() {
+  const inp = document.getElementById('ticker-add-input');
+  const v = inp.value.trim().toUpperCase();
+  if (!v) return;
+  const syms = getTickerSymbols();
+  if (!syms.includes(v)) { syms.push(v); saveTickerSymbols(syms); }
+  inp.value = '';
+  renderTickerTags();
+}
+
+function removeTickerSymbol(s) {
+  const syms = getTickerSymbols().filter(x => x !== s);
+  saveTickerSymbols(syms);
+  renderTickerTags();
+}
+
+let _tickerTimer = null;
+
+async function fetchTickers() {
+  const syms = getTickerSymbols();
+  const list = document.getElementById('ticker-list');
+  if (!list) return;
+  list.innerHTML = '<div class="ticker-loading">Loading...</div>';
+
+  const results = await Promise.all(syms.map(async sym => {
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxy);
+      const json = await res.json();
+      const data = JSON.parse(json.contents);
+      const meta = data?.chart?.result?.[0]?.meta;
+      if (!meta) return { sym, error: true };
+      const price = meta.regularMarketPrice;
+      const prev = meta.chartPreviousClose || meta.previousClose;
+      const chg = prev ? ((price - prev) / prev * 100) : 0;
+      return { sym, price, chg };
+    } catch(e) {
+      return { sym, error: true };
+    }
+  }));
+
+  list.innerHTML = results.map(r => {
+    if (r.error) return `<div class="ticker-item"><span class="ticker-sym">${esc(r.sym)}</span><span class="ticker-price" style="color:var(--text3)">—</span><span class="ticker-chg flat">—</span></div>`;
+    const fmtPrice = r.price >= 1000 ? r.price.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}) : r.price.toFixed(2);
+    const chgClass = r.chg > 0 ? 'up' : r.chg < 0 ? 'dn' : 'flat';
+    const chgStr = (r.chg >= 0 ? '+' : '') + r.chg.toFixed(2) + '%';
+    return `<div class="ticker-item"><span class="ticker-sym">${esc(r.sym.replace('-USD',''))}</span><span class="ticker-price">${fmtPrice}</span><span class="ticker-chg ${chgClass}">${chgStr}</span></div>`;
+  }).join('');
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const el = document.getElementById('ticker-time');
+  if (el) el.textContent = timeStr;
+
+  // Auto-refresh every 5 minutes
+  clearTimeout(_tickerTimer);
+  _tickerTimer = setTimeout(fetchTickers, 5 * 60 * 1000);
+}
+
 // ── Mobile Navigation ─────────────────────────────────────────────────────────
 const MOB_NAV_VIEWS = ['all', 'today', 'starred'];
 
@@ -1487,6 +1794,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     setUserUI(session.user);
     hideAuthScreen();
     await loadData();
+    fetchTickers();
   } else if (event === 'SIGNED_OUT') {
     currentUser = null;
     state.tasks = []; state.cats = [];
