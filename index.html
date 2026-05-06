@@ -1597,28 +1597,38 @@ function restoreTickerDisplay() {
   if (timeEl && _lastTickerTime) timeEl.textContent = _lastTickerTime;
 }
 
+async function fetchOneTicker(sym) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+      const raw = await res.json();
+      // allorigins wraps in .contents string, others return directly
+      const data = raw.contents ? JSON.parse(raw.contents) : raw;
+      const meta = data?.chart?.result?.[0]?.meta;
+      if (!meta || !meta.regularMarketPrice) continue;
+      const price = meta.regularMarketPrice;
+      const prev = meta.chartPreviousClose || meta.previousClose || price;
+      const chg = ((price - prev) / prev * 100);
+      return { sym, price, chg };
+    } catch(e) { continue; }
+  }
+  return { sym, error: true };
+}
+
 async function fetchTickers() {
   const syms = getTickerSymbols();
   const list = document.getElementById('ticker-list');
   if (!list) return;
   list.innerHTML = '<div class="ticker-loading" style="grid-column:1/-1">Loading...</div>';
 
-  const results = await Promise.all(syms.map(async sym => {
-    try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
-      const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-      const res = await fetch(proxy);
-      const data = await res.json();
-      const meta = data?.chart?.result?.[0]?.meta;
-      if (!meta) return { sym, error: true };
-      const price = meta.regularMarketPrice;
-      const prev = meta.chartPreviousClose || meta.previousClose;
-      const chg = prev ? ((price - prev) / prev * 100) : 0;
-      return { sym, price, chg };
-    } catch(e) {
-      return { sym, error: true };
-    }
-  }));
+  const results = await Promise.all(syms.map(fetchOneTicker));
 
   list.innerHTML = results.map(r => {
     const label = r.sym.replace('-USD','');
@@ -1626,7 +1636,7 @@ async function fetchTickers() {
     const fmtPrice = r.price >= 10000 ? r.price.toLocaleString(undefined,{maximumFractionDigits:0})
                    : r.price >= 100   ? r.price.toFixed(2)
                    :                    r.price.toFixed(3);
-    const chgClass = r.chg > 0 ? 'up' : r.chg < 0 ? 'dn' : 'flat';
+    const chgClass = r.chg > 0.01 ? 'up' : r.chg < -0.01 ? 'dn' : 'flat';
     const chgStr = (r.chg >= 0 ? '+' : '') + r.chg.toFixed(2) + '%';
     return `<div class="ticker-item"><span class="ticker-sym">${esc(label)}</span><span class="ticker-price">${fmtPrice}</span><span class="ticker-chg ${chgClass}">${chgStr}</span></div>`;
   }).join('');
