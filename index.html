@@ -42,7 +42,7 @@
   --radius-lg: 12px;
 }
 /* Dark theme */
-[data-theme="dark"] {
+html[data-theme="dark"], html[data-theme="dark"] :root {
   --bg: #13151f;
   --surface: #1a1d2e;
   --surface2: #222640;
@@ -64,7 +64,7 @@
 }
 /* Device/auto theme */
 @media (prefers-color-scheme: dark) {
-  [data-theme="device"] {
+  html[data-theme="device"] {
     --bg: #13151f;
     --surface: #1a1d2e;
     --surface2: #222640;

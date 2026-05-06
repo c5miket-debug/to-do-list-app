@@ -612,17 +612,7 @@ textarea.form-input { resize: vertical; min-height: 70px; }
       <div class="add-cat" onclick="showAddCat()">+ add category</div>
     </div>
 
-    <!-- Ticker Widget -->
-    <div class="ticker-wrap" id="ticker-wrap">
-      <div class="ticker-header">
-        <span class="ticker-label">Markets</span>
-        <span class="ticker-refresh" onclick="fetchTickers()" title="Refresh">↻</span>
-        <span class="ticker-time" id="ticker-time"></span>
-      </div>
-      <div id="ticker-list"><div class="ticker-loading">Loading...</div></div>
-    </div>
-
-    <div style="padding:8px;border-top:1px solid var(--border);flex-shrink:0">
+    <div style="margin-top:auto;padding:8px;border-top:1px solid var(--border);flex-shrink:0">
       <div class="nav-item" onclick="exportCSV()"><span class="nav-icon">↓</span> Export tasks</div>
       <div class="nav-item" onclick="showImportModal()"><span class="nav-icon">↑</span> Import tasks</div>
       <div class="nav-item" onclick="showSettings()"><span class="nav-icon">⚙</span> Settings</div>
@@ -992,7 +982,22 @@ function render() {
         <div style="font-size:12px;color:var(--text2);line-height:1.5;font-style:italic">"${esc(q.text)}"</div>
         <div style="font-size:11px;color:var(--text3);margin-top:4px">— ${esc(q.author)}</div>
       </div>
+      <div id="ticker-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;margin-top:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">Markets</span>
+          <span style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:10px;color:var(--text3);font-family:var(--mono)" id="ticker-time"></span>
+            <span class="ticker-refresh" onclick="fetchTickers()" title="Refresh" style="font-size:13px;cursor:pointer;color:var(--text3);padding:1px 4px;border-radius:4px">↻</span>
+          </span>
+        </div>
+        <div id="ticker-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:2px">
+          <div class="ticker-loading">Loading...</div>
+        </div>
+      </div>
     </div>` + renderTaskList(getFiltered());
+    // Only fetch if stale or no data yet
+    if (!_lastTickerFetch || Date.now() - _lastTickerFetch > 5 * 60 * 1000) fetchTickers();
+    else restoreTickerDisplay();
     return;
   }
 
@@ -1499,20 +1504,24 @@ function getDailyQuote() {
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('tf-theme', theme);
-  document.querySelectorAll('.theme-opt').forEach(el => {
-    el.classList.toggle('active', el.dataset.theme === theme);
-  });
+  // Only update buttons if settings modal is open
+  const modal = document.getElementById('settings-modal');
+  if (modal && modal.style.display !== 'none') {
+    document.querySelectorAll('.theme-opt').forEach(el => {
+      el.classList.toggle('active', el.dataset.theme === theme);
+    });
+  }
 }
 function setTheme(theme) { applyTheme(theme); }
-// Apply saved theme on load
-applyTheme(localStorage.getItem('tf-theme') || 'device');
+// Apply saved theme on load — just set the attribute, no DOM needed yet
+document.documentElement.setAttribute('data-theme', localStorage.getItem('tf-theme') || 'device');
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 function showSettings() {
-  renderTickerTags();
   document.getElementById('settings-modal').style.display = 'flex';
   const saved = localStorage.getItem('tf-theme') || 'device';
   document.querySelectorAll('.theme-opt').forEach(el => el.classList.toggle('active', el.dataset.theme === saved));
+  renderTickerTags();
 }
 function closeSettings() {
   document.getElementById('settings-modal').style.display = 'none';
@@ -1554,20 +1563,29 @@ function removeTickerSymbol(s) {
 }
 
 let _tickerTimer = null;
+let _lastTickerFetch = null;
+let _lastTickerHTML = null;
+let _lastTickerTime = null;
+
+function restoreTickerDisplay() {
+  const list = document.getElementById('ticker-list');
+  const timeEl = document.getElementById('ticker-time');
+  if (list && _lastTickerHTML) list.innerHTML = _lastTickerHTML;
+  if (timeEl && _lastTickerTime) timeEl.textContent = _lastTickerTime;
+}
 
 async function fetchTickers() {
   const syms = getTickerSymbols();
   const list = document.getElementById('ticker-list');
   if (!list) return;
-  list.innerHTML = '<div class="ticker-loading">Loading...</div>';
+  list.innerHTML = '<div class="ticker-loading" style="grid-column:1/-1">Loading...</div>';
 
   const results = await Promise.all(syms.map(async sym => {
     try {
       const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
-      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
       const res = await fetch(proxy);
-      const json = await res.json();
-      const data = JSON.parse(json.contents);
+      const data = await res.json();
       const meta = data?.chart?.result?.[0]?.meta;
       if (!meta) return { sym, error: true };
       const price = meta.regularMarketPrice;
@@ -1580,19 +1598,23 @@ async function fetchTickers() {
   }));
 
   list.innerHTML = results.map(r => {
-    if (r.error) return `<div class="ticker-item"><span class="ticker-sym">${esc(r.sym)}</span><span class="ticker-price" style="color:var(--text3)">—</span><span class="ticker-chg flat">—</span></div>`;
-    const fmtPrice = r.price >= 1000 ? r.price.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}) : r.price.toFixed(2);
+    const label = r.sym.replace('-USD','');
+    if (r.error) return `<div class="ticker-item"><span class="ticker-sym">${esc(label)}</span><span class="ticker-price" style="color:var(--text3)">—</span><span class="ticker-chg flat">—</span></div>`;
+    const fmtPrice = r.price >= 10000 ? r.price.toLocaleString(undefined,{maximumFractionDigits:0})
+                   : r.price >= 100   ? r.price.toFixed(2)
+                   :                    r.price.toFixed(3);
     const chgClass = r.chg > 0 ? 'up' : r.chg < 0 ? 'dn' : 'flat';
     const chgStr = (r.chg >= 0 ? '+' : '') + r.chg.toFixed(2) + '%';
-    return `<div class="ticker-item"><span class="ticker-sym">${esc(r.sym.replace('-USD',''))}</span><span class="ticker-price">${fmtPrice}</span><span class="ticker-chg ${chgClass}">${chgStr}</span></div>`;
+    return `<div class="ticker-item"><span class="ticker-sym">${esc(label)}</span><span class="ticker-price">${fmtPrice}</span><span class="ticker-chg ${chgClass}">${chgStr}</span></div>`;
   }).join('');
 
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const timeStr = 'as of ' + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   const el = document.getElementById('ticker-time');
   if (el) el.textContent = timeStr;
+  _lastTickerHTML = list.innerHTML;
+  _lastTickerTime = timeStr;
+  _lastTickerFetch = Date.now();
 
-  // Auto-refresh every 5 minutes
   clearTimeout(_tickerTimer);
   _tickerTimer = setTimeout(fetchTickers, 5 * 60 * 1000);
 }

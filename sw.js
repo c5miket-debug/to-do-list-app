@@ -1,7 +1,7 @@
 // TaskFlow Service Worker
 // Strategy: Cache-first for app shell, network-first for Supabase API calls
 
-const CACHE_NAME = 'taskflow-v2';
+const CACHE_NAME = 'taskflow-v3';
 
 // App shell files to cache on install
 const SHELL_FILES = [
