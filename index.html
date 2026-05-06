@@ -18,6 +18,13 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+/* ── Light theme (explicit) ───────────────────────────────────────────────── */
+html[data-theme="light"] {
   --bg: #f0f2f8;
   --surface: #ffffff;
   --surface2: #e8ebf4;
@@ -36,13 +43,9 @@
   --success: #1e8449; --success-bg: #eafaf1;
   --danger: #c0392b; --danger-bg: #fdf0ef;
   --warning: #d68910; --warning-bg: #fef9ec;
-  --font: 'DM Sans', sans-serif;
-  --mono: 'DM Mono', monospace;
-  --radius: 8px;
-  --radius-lg: 12px;
 }
-/* Dark theme */
-html[data-theme="dark"], html[data-theme="dark"] :root {
+/* ── Dark theme (explicit) ────────────────────────────────────────────────── */
+html[data-theme="dark"] {
   --bg: #13151f;
   --surface: #1a1d2e;
   --surface2: #222640;
@@ -62,7 +65,27 @@ html[data-theme="dark"], html[data-theme="dark"] :root {
   --danger: #e74c3c; --danger-bg: #2a1518;
   --warning: #e6a817; --warning-bg: #2a2010;
 }
-/* Device/auto theme */
+/* ── Device theme — follow OS preference ─────────────────────────────────── */
+html[data-theme="device"] {
+  --bg: #f0f2f8;
+  --surface: #ffffff;
+  --surface2: #e8ebf4;
+  --border: #dde1ee;
+  --border2: #c8cde0;
+  --text: #1a1d2e;
+  --text2: #5a6080;
+  --text3: #9399b8;
+  --accent: #3d52d5;
+  --accent-bg: #eef1fd;
+  --accent-text: #1a3fa8;
+  --p1: #c0392b; --p1bg: #fdf0ef; --p1t: #922b21;
+  --p2: #d68910; --p2bg: #fef9ec; --p2t: #9a6310;
+  --p3: #2471a3; --p3bg: #eaf4fb; --p3t: #1a5276;
+  --p4: #7d8d8c; --p4bg: #f4f6f6; --p4t: #566868;
+  --success: #1e8449; --success-bg: #eafaf1;
+  --danger: #c0392b; --danger-bg: #fdf0ef;
+  --warning: #d68910; --warning-bg: #fef9ec;
+}
 @media (prefers-color-scheme: dark) {
   html[data-theme="device"] {
     --bg: #13151f;
