@@ -1191,8 +1191,6 @@ async function saveTask() {
   const title = document.getElementById('f-title').value.trim();
   if (!title) { document.getElementById('f-title').focus(); return; }
   const catId = document.getElementById('f-cat').value || null;
-  // Capture subtasks BEFORE closeModal resets state.formSubtasks
-  const subtasksSnapshot = JSON.parse(JSON.stringify(state.formSubtasks));
   const payload = {
     title, category_id: catId, priority: state.formPrio,
     due_date: document.getElementById('f-due-date').value || null,
@@ -1200,7 +1198,7 @@ async function saveTask() {
     recur: document.getElementById('f-recur').value || null,
     notes: document.getElementById('f-notes').value || null,
     pinned: getFormPin(),
-    subtasks: subtasksSnapshot,
+    subtasks: state.formSubtasks,
     user_id: currentUser?.id
   };
   closeModal();
