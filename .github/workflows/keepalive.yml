@@ -1,0 +1,43 @@
+# Keep-alive ping for the free-tier Supabase project.
+#
+# Secrets SUPABASE_URL and SUPABASE_ANON_KEY are the existing public
+# project URL + anon (JWT) key already hardcoded in index.html.
+# They are NOT a service-role key. Do not hardcode the anon JWT here —
+# set them in repo Settings → Secrets and variables → Actions after merge.
+#
+# This cheap REST GET keeps the paused-after-inactivity free DB awake.
+# The job fails on any non-2xx so Mike notices if the project is paused again.
+
+name: Keepalive
+
+on:
+  schedule:
+    # At least twice a week (Mon + Thu 14:00 UTC). Weekends are fine too.
+    - cron: '0 14 * * 1,4'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping categories
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "Missing SUPABASE_URL or SUPABASE_ANON_KEY secret."
+            exit 1
+          fi
+          url="${SUPABASE_URL%/}/rest/v1/categories?select=id&limit=1"
+          code=$(curl -sS -o /tmp/keepalive.body -w '%{http_code}' \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "$url")
+          echo "HTTP ${code}"
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "Keepalive ping failed (project paused or secrets wrong)."
+            cat /tmp/keepalive.body || true
+            exit 1
+          fi
