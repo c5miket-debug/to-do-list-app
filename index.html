@@ -376,35 +376,6 @@ textarea.form-input { resize: vertical; min-height: 70px; }
   .task-card:hover { box-shadow: 0 2px 8px rgba(107,130,240,0.15); }
 }
 
-/* ── Ticker Widget ───────────────────────────────────────────────────────── */
-.ticker-wrap {
-  padding: 10px 8px 8px;
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.ticker-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 4px 6px;
-}
-.ticker-label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; }
-.ticker-time { font-size: 9px; color: var(--text3); font-family: var(--mono); }
-.ticker-item {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 8px; border-radius: 8px;
-  background: var(--surface2);
-  min-width: 0;
-}
-.ticker-sym { font-size: 10px; font-weight: 700; color: var(--text2); font-family: var(--mono); flex-shrink: 0; }
-.ticker-price { font-size: 11px; color: var(--text); font-family: var(--mono); font-weight: 500; }
-.ticker-chg-wrap { display: flex; flex-direction: column; align-items: flex-end; margin-left: auto; flex-shrink: 0; }
-.ticker-chg { font-size: 9px; font-family: var(--mono); text-align: right; line-height: 1.3; }
-.ticker-chg.up { color: var(--success); }
-.ticker-chg.dn { color: var(--danger); }
-.ticker-chg.flat { color: var(--text3); }
-.ticker-loading { font-size: 10px; color: var(--text3); text-align: center; padding: 6px 0; }
-.ticker-refresh { cursor: pointer; font-size: 10px; color: var(--text3); padding: 2px 4px; border-radius: 4px; }
-.ticker-refresh:hover { color: var(--accent); background: var(--accent-bg); }
-
 /* ── Settings Modal ──────────────────────────────────────────────────────── */
 .settings-section { margin-bottom: 20px; }
 .settings-section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
@@ -418,18 +389,7 @@ textarea.form-input { resize: vertical; min-height: 70px; }
 .theme-opt:hover { border-color: var(--accent); color: var(--text); }
 .theme-opt.active { border-color: var(--accent); background: var(--accent-bg); color: var(--accent-text); font-weight: 500; }
 .theme-opt-icon { font-size: 18px; display: block; margin-bottom: 4px; }
-.ticker-config { display: flex; flex-direction: column; gap: 6px; }
-.ticker-config-row { display: flex; align-items: center; gap: 8px; }
-.ticker-config-row input { flex: 1; }
-.ticker-config-add { display: flex; gap: 6px; margin-top: 4px; }
-.ticker-config-add input { flex: 1; }
-.ticker-tag {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 8px; background: var(--accent-bg); color: var(--accent-text);
-  border-radius: 20px; font-size: 11px; font-weight: 500; font-family: var(--mono);
-}
-.ticker-tag-remove { cursor: pointer; opacity: 0.5; font-size: 12px; }
-.ticker-tag-remove:hover { opacity: 1; }
+.btn-pri:disabled { opacity: 0.55; cursor: default; }
 
 /* ── Mobile Layout (≤ 640px) ─────────────────────────────────────────────── */
 @media (max-width: 640px) {
@@ -814,7 +774,7 @@ textarea.form-input { resize: vertical; min-height: 70px; }
     </div>
     <div class="form-footer">
       <button class="btn-sec" onclick="closeModal()">Cancel</button>
-      <button class="btn-pri" onclick="saveTask()">Save Task</button>
+      <button class="btn-pri" id="save-task-btn" onclick="saveTask()">Save Task</button>
     </div>
   </div>
 </div>
@@ -860,15 +820,6 @@ textarea.form-input { resize: vertical; min-height: 70px; }
           <span class="theme-opt-icon">💻</span> Device
         </button>
       </div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-section-title">Market Tickers</div>
-      <div id="ticker-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
-      <div class="ticker-config-add">
-        <input class="form-input" id="ticker-add-input" placeholder="Add symbol e.g. AAPL" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')addTickerSymbol()">
-        <button class="btn-pri" onclick="addTickerSymbol()">Add</button>
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:8px">Prices from Yahoo Finance · ~15 min delayed for stocks · near real-time for crypto (BTC-USD, SOL-USD)</div>
     </div>
     <div class="form-footer">
       <button class="btn-sec" onclick="closeSettings()">Close</button>
@@ -918,14 +869,26 @@ async function loadData() {
   render();
 }
 
+function localYMD(d) {
+  const x = d || new Date();
+  const y = x.getFullYear();
+  const m = String(x.getMonth() + 1).padStart(2, '0');
+  const day = String(x.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
 function isToday(t) {
   if (!t.due_date) return false;
-  return t.due_date === new Date().toISOString().slice(0,10);
+  return t.due_date === localYMD();
 }
 
 function isOverdue(t) {
   if (!t.due_date || t.done) return false;
-  return t.due_date < new Date().toISOString().slice(0,10);
+  return t.due_date < localYMD();
+}
+
+function inTodayList(t) {
+  return isToday(t) || isOverdue(t) || t.pinned;
 }
 
 function fmtDue(t) {
@@ -947,7 +910,7 @@ function getFiltered() {
   let tasks = state.tasks.filter(t => {
     if (state.view === 'completed') return t.done;
     if (t.done) return false;
-    if (state.view === 'today') return isToday(t) || isOverdue(t) || t.pinned;
+    if (state.view === 'today') return inTodayList(t);
     if (state.view === 'starred') return t.pinned;
     if (state.view.startsWith('cat-')) return t.category_id === state.view.slice(4);
     return true;
@@ -971,7 +934,7 @@ function getFiltered() {
 function render() {
   const active = state.tasks.filter(t=>!t.done);
   document.getElementById('cnt-all').textContent = active.length;
-  document.getElementById('cnt-today').textContent = active.filter(t=>isToday(t)||isOverdue(t)).length;
+  document.getElementById('cnt-today').textContent = active.filter(inTodayList).length;
   document.getElementById('cnt-starred').textContent = active.filter(t=>t.pinned).length;
   document.getElementById('cnt-done').textContent = state.tasks.filter(t=>t.done).length;
   updateMobBadges();
@@ -994,37 +957,6 @@ function render() {
   }).join('');
 
   const list = document.getElementById('task-list');
-
-  // Quote banner for today view
-  if (state.view === 'today') {
-    const today = new Date().toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
-    const q = getDailyQuote();
-    const overdueCount = state.tasks.filter(t=>!t.done && isOverdue(t)).length;
-    const overdueNote = overdueCount > 0 ? `<span style="font-size:11px;color:var(--danger);margin-left:8px">● ${overdueCount} overdue</span>` : '';
-    list.innerHTML = `<div style="margin-bottom:12px">
-      <div style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:2px">${today}${overdueNote}</div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-lg);padding:10px 14px;margin-top:8px">
-        <div style="font-size:12px;color:var(--text2);line-height:1.5;font-style:italic">"${esc(q.text)}"</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:4px">— ${esc(q.author)}</div>
-      </div>
-      <div id="ticker-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;margin-top:8px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <span style="font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">Markets</span>
-          <span style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:10px;color:var(--text3);font-family:var(--mono)" id="ticker-time"></span>
-            <span class="ticker-refresh" onclick="fetchTickers()" title="Refresh" style="font-size:13px;cursor:pointer;color:var(--text3);padding:1px 4px;border-radius:4px">↻</span>
-          </span>
-        </div>
-        <div id="ticker-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px">
-          <div class="ticker-loading">Loading...</div>
-        </div>
-      </div>
-    </div>` + renderTaskList(getFiltered());
-    // Only fetch if stale or no data yet
-    if (!_lastTickerFetch || Date.now() - _lastTickerFetch > 5 * 60 * 1000) fetchTickers();
-    else restoreTickerDisplay();
-    return;
-  }
 
   const tasks = getFiltered();
   if (!tasks.length) {
@@ -1136,7 +1068,7 @@ function openNew() {
   document.getElementById('modal-heading').textContent = 'New Task';
   document.getElementById('f-title').value = '';
   document.getElementById('f-notes').value = '';
-  document.getElementById('f-due-date').value = '';
+  document.getElementById('f-due-date').value = state.view === 'today' ? localYMD() : '';
   document.getElementById('f-due-time').value = '';
   document.getElementById('f-recur').value = '';
   setFormPin(false);
@@ -1188,11 +1120,13 @@ function addSubtask() {
   renderSubtasks();
 }
 
+let _saveTaskBusy = false;
 async function saveTask() {
+  if (_saveTaskBusy) return;
   const title = document.getElementById('f-title').value.trim();
   if (!title) { document.getElementById('f-title').focus(); return; }
+  const btn = document.getElementById('save-task-btn');
   const catId = document.getElementById('f-cat').value || null;
-  // Capture subtasks BEFORE closeModal resets state.formSubtasks
   const subtasksSnapshot = JSON.parse(JSON.stringify(state.formSubtasks));
   const payload = {
     title, category_id: catId, priority: state.formPrio,
@@ -1204,21 +1138,36 @@ async function saveTask() {
     subtasks: subtasksSnapshot,
     user_id: currentUser?.id
   };
-  closeModal();
+  if (!state.editId) payload.done = false;
+  _saveTaskBusy = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
   setSyncStatus('syncing');
-  if (state.editId) {
-    const { data, error } = await sb.from('tasks').update(payload).eq('id', state.editId).select();
-    if (error) { setSyncStatus('error'); showToast('Error saving: ' + error.message); return; }
-    const idx = state.tasks.findIndex(t=>t.id===state.editId);
-    if (idx>=0 && data) state.tasks[idx] = { ...state.tasks[idx], ...data[0] };
-  } else {
-    const { data, error } = await sb.from('tasks').insert([payload]).select();
-    if (error) { setSyncStatus('error'); showToast('Error saving: ' + error.message); return; }
-    if (data) state.tasks.push(data[0]);
+  let saved = null;
+  try {
+    if (state.editId) {
+      const { data, error } = await sb.from('tasks').update(payload).eq('id', state.editId).select();
+      if (error) { setSyncStatus('error'); showToast('Error saving: ' + error.message); return; }
+      const idx = state.tasks.findIndex(t=>t.id===state.editId);
+      if (idx>=0 && data) state.tasks[idx] = { ...state.tasks[idx], ...data[0] };
+      saved = data && data[0] ? data[0] : state.tasks[idx];
+    } else {
+      const { data, error } = await sb.from('tasks').insert([payload]).select();
+      if (error) { setSyncStatus('error'); showToast('Error saving: ' + error.message); return; }
+      if (data) { state.tasks.push(data[0]); saved = data[0]; }
+    }
+    setSyncStatus('synced');
+    const visible = saved && getFiltered().some(t => t.id === saved.id);
+    closeModal();
+    render();
+    if (saved && !visible) {
+      const catName = saved.category_id ? getCatName(saved.category_id) : '';
+      showToast('Saved — find it in ' + (catName || 'All Tasks'));
+    }
+    checkNotification(payload);
+  } finally {
+    _saveTaskBusy = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Task'; }
   }
-  setSyncStatus('synced');
-  render();
-  checkNotification(payload);
 }
 
 function closeModal() { document.getElementById('task-modal').style.display = 'none'; }
@@ -1490,44 +1439,6 @@ function toggleFormPin() {
   setFormPin(!getFormPin());
 }
 
-// ── Daily Quote ───────────────────────────────────────────────────────────────
-const QUOTES = [
-  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
-  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
-  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
-  { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
-  { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
-  { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
-  { text: "Well done is better than well said.", author: "Benjamin Franklin" },
-  { text: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
-  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
-  { text: "Do something today that your future self will thank you for.", author: "Sean Patrick Flanery" },
-  { text: "Small steps in the right direction can turn out to be the biggest step of your life.", author: "Unknown" },
-  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
-  { text: "Your time is limited, don't waste it living someone else's life.", author: "Steve Jobs" },
-  { text: "The key is not to prioritize what's on your schedule, but to schedule your priorities.", author: "Stephen Covey" },
-  { text: "Done is better than perfect.", author: "Sheryl Sandberg" },
-  { text: "Productivity is never an accident. It is always the result of a commitment to excellence.", author: "Paul J. Meyer" },
-  { text: "You are never too old to set another goal or dream a new dream.", author: "C.S. Lewis" },
-  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
-  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
-  { text: "If you spend too much time thinking about a thing, you'll never get it done.", author: "Bruce Lee" },
-  { text: "Either you run the day, or the day runs you.", author: "Jim Rohn" },
-  { text: "Yesterday is gone. Tomorrow has not yet come. We have only today.", author: "Mother Teresa" },
-  { text: "The most difficult thing is the decision to act, the rest is merely tenacity.", author: "Amelia Earhart" },
-  { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
-  { text: "Don't count the days, make the days count.", author: "Muhammad Ali" },
-  { text: "It's not about having time. It's about making time.", author: "Unknown" },
-  { text: "Amateurs sit and wait for inspiration, the rest of us just show up and get to work.", author: "Stephen King" },
-  { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
-  { text: "If you want to live a happy life, tie it to a goal, not to people or things.", author: "Albert Einstein" },
-  { text: "Nothing will work unless you do.", author: "Maya Angelou" },
-];
-function getDailyQuote() {
-  const day = Math.floor(Date.now() / 86400000);
-  return QUOTES[day % QUOTES.length];
-}
-
 // ── Theme ─────────────────────────────────────────────────────────────────────
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -1551,16 +1462,12 @@ function showSettings() {
   document.getElementById('settings-modal').style.display = 'flex';
   const saved = localStorage.getItem('tf-theme') || 'device';
   document.querySelectorAll('.theme-opt').forEach(el => el.classList.toggle('active', el.dataset.theme === saved));
-  renderTickerTags();
 }
 function closeSettings() {
   document.getElementById('settings-modal').style.display = 'none';
-  fetchTickers();
 }
 
-// ── Ticker ────────────────────────────────────────────────────────────────────
 // ── User Settings (Supabase-backed) ──────────────────────────────────────────
-const DEFAULT_TICKERS = ['TSLA','MSTR','GOOG','AMZN','PLTR','BTC-USD','SOL-USD'];
 let _userSettings = null; // cached settings object
 
 async function loadUserSettings() {
@@ -1571,29 +1478,23 @@ async function loadUserSettings() {
     if (data) {
       _userSettings = data;
     } else {
-      // First time — create row with defaults
-      const defaults = { user_id: currentUser.id, tickers: DEFAULT_TICKERS, theme: 'device' };
+      // First time — create row with defaults (theme only; no tickers)
+      const defaults = { user_id: currentUser.id, theme: 'device' };
       const { data: created, error: ce } = await sb.from('user_settings').insert([defaults]).select().single();
       if (ce) throw ce;
       _userSettings = created;
     }
-    // Apply loaded settings
     applyTheme(_userSettings.theme);
   } catch(e) {
     console.warn('Settings load failed, using localStorage fallback:', e.message);
-    _userSettings = {
-      tickers: JSON.parse(localStorage.getItem('tf-tickers') || 'null') || DEFAULT_TICKERS,
-      theme: localStorage.getItem('tf-theme') || 'device'
-    };
+    _userSettings = { theme: localStorage.getItem('tf-theme') || 'device' };
     applyTheme(_userSettings.theme);
   }
 }
 
 async function saveUserSettings(patch) {
   _userSettings = { ..._userSettings, ...patch };
-  // Always keep localStorage in sync as offline fallback
   if (patch.theme) localStorage.setItem('tf-theme', patch.theme);
-  if (patch.tickers) localStorage.setItem('tf-tickers', JSON.stringify(patch.tickers));
   try {
     await sb.from('user_settings')
       .upsert({ user_id: currentUser.id, ...patch, updated_at: new Date().toISOString() },
@@ -1601,114 +1502,6 @@ async function saveUserSettings(patch) {
   } catch(e) {
     console.warn('Settings save failed:', e.message);
   }
-}
-
-function getTickerSymbols() {
-  return _userSettings?.tickers || DEFAULT_TICKERS;
-}
-
-function saveTickerSymbols(syms) {
-  saveUserSettings({ tickers: syms });
-}
-
-function renderTickerTags() {
-  const syms = getTickerSymbols();
-  document.getElementById('ticker-tags').innerHTML = syms.map(s =>
-    `<span class="ticker-tag">${esc(s)} <span class="ticker-tag-remove" onclick="removeTickerSymbol('${s}')">×</span></span>`
-  ).join('');
-}
-
-function addTickerSymbol() {
-  const inp = document.getElementById('ticker-add-input');
-  const v = inp.value.trim().toUpperCase();
-  if (!v) return;
-  const syms = getTickerSymbols();
-  if (!syms.includes(v)) { syms.push(v); saveTickerSymbols(syms); }
-  inp.value = '';
-  renderTickerTags();
-}
-
-function removeTickerSymbol(s) {
-  const syms = getTickerSymbols().filter(x => x !== s);
-  saveTickerSymbols(syms);
-  renderTickerTags();
-}
-
-let _tickerTimer = null;
-let _lastTickerFetch = null;
-let _lastTickerHTML = null;
-let _lastTickerTime = null;
-
-function restoreTickerDisplay() {
-  const list = document.getElementById('ticker-list');
-  const timeEl = document.getElementById('ticker-time');
-  if (list && _lastTickerHTML) list.innerHTML = _lastTickerHTML;
-  if (timeEl && _lastTickerTime) timeEl.textContent = _lastTickerTime;
-}
-
-async function fetchOneTicker(sym) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
-  const proxies = [
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-  ];
-  for (const proxy of proxies) {
-    try {
-      const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) continue;
-      const raw = await res.json();
-      // allorigins wraps in .contents string, others return directly
-      const data = raw.contents ? JSON.parse(raw.contents) : raw;
-      const meta = data?.chart?.result?.[0]?.meta;
-      if (!meta || !meta.regularMarketPrice) continue;
-      const price = meta.regularMarketPrice;
-      const prev = meta.chartPreviousClose || meta.previousClose || price;
-      const chg = ((price - prev) / prev * 100);
-      return { sym, price, prev, chg };
-    } catch(e) { continue; }
-  }
-  return { sym, error: true };
-}
-
-async function fetchTickers() {
-  const syms = getTickerSymbols();
-  const list = document.getElementById('ticker-list');
-  if (!list) return;
-  list.innerHTML = '<div class="ticker-loading" style="grid-column:1/-1">Loading...</div>';
-
-  const results = await Promise.all(syms.map(fetchOneTicker));
-
-  list.innerHTML = results.map(r => {
-    const label = r.sym.replace('-USD','');
-    if (r.error) return `<div class="ticker-item"><span class="ticker-sym">${esc(label)}</span><span class="ticker-price" style="color:var(--text3)">—</span><div class="ticker-chg-wrap"><span class="ticker-chg flat">—</span></div></div>`;
-    const fmtPrice = r.price >= 10000 ? r.price.toLocaleString(undefined,{maximumFractionDigits:0})
-                   : r.price >= 100   ? r.price.toFixed(2)
-                   :                    r.price.toFixed(3);
-    const chgClass = r.chg > 0.01 ? 'up' : r.chg < -0.01 ? 'dn' : 'flat';
-    const sign = r.chg >= 0 ? '+' : '';
-    const dollarChg = r.prev ? (r.price - r.prev) : 0;
-    const fmtDollar = sign + (dollarChg >= 100 ? dollarChg.toFixed(0) : dollarChg.toFixed(2));
-    const fmtPct = sign + r.chg.toFixed(2) + '%';
-    return `<div class="ticker-item">
-      <span class="ticker-sym">${esc(label)}</span>
-      <span class="ticker-price">${fmtPrice}</span>
-      <div class="ticker-chg-wrap">
-        <span class="ticker-chg ${chgClass}">${fmtDollar}</span>
-        <span class="ticker-chg ${chgClass}">${fmtPct}</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  const timeStr = 'as of ' + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  const el = document.getElementById('ticker-time');
-  if (el) el.textContent = timeStr;
-  _lastTickerHTML = list.innerHTML;
-  _lastTickerTime = timeStr;
-  _lastTickerFetch = Date.now();
-
-  clearTimeout(_tickerTimer);
-  _tickerTimer = setTimeout(fetchTickers, 5 * 60 * 1000);
 }
 
 // ── Mobile Navigation ─────────────────────────────────────────────────────────
@@ -1763,7 +1556,7 @@ const _origSetView = setView;
 
 function updateMobBadges() {
   const active = state.tasks.filter(t => !t.done);
-  const todayCnt = active.filter(t => isToday(t) || isOverdue(t)).length;
+  const todayCnt = active.filter(inTodayList).length;
   const starCnt = active.filter(t => t.pinned).length;
   const doneCnt = state.tasks.filter(t => t.done).length;
   const allCnt = active.length;
@@ -1892,7 +1685,6 @@ let _appReady = false;
       hideAuthScreen();
       await loadData();
       await loadUserSettings();
-      fetchTickers();
     } else {
       showAuthScreen();
     }
@@ -1911,7 +1703,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
     hideAuthScreen();
     await loadData();
     await loadUserSettings();
-    fetchTickers();
   } else if (event === 'SIGNED_OUT') {
     currentUser = null;
     state.tasks = []; state.cats = [];
