@@ -1120,6 +1120,14 @@ function addSubtask() {
   renderSubtasks();
 }
 
+function withTimeout(promise, ms) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error('Save timed out — try again')), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 let _saveTaskBusy = false;
 async function saveTask() {
   if (_saveTaskBusy) return;
@@ -1135,23 +1143,43 @@ async function saveTask() {
     recur: document.getElementById('f-recur').value || null,
     notes: document.getElementById('f-notes').value || null,
     pinned: getFormPin(),
-    subtasks: subtasksSnapshot,
-    user_id: currentUser?.id
+    subtasks: subtasksSnapshot
   };
-  if (!state.editId) payload.done = false;
+  if (!state.editId) {
+    payload.done = false;
+    payload.user_id = currentUser?.id;
+  }
   _saveTaskBusy = true;
   if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
   setSyncStatus('syncing');
   let saved = null;
   try {
     if (state.editId) {
-      const { data, error } = await sb.from('tasks').update(payload).eq('id', state.editId).select();
+      // Do not chain .select() on UPDATE — RETURNING after update hung the UI.
+      // Omit user_id on update (insert-only) so RLS/WITH CHECK cannot stall the PATCH.
+      const { error } = await withTimeout(
+        sb.from('tasks').update(payload).eq('id', state.editId),
+        10000
+      );
       if (error) { setSyncStatus('error'); showToast('Error saving: ' + error.message); return; }
+      const { data, error: readErr } = await withTimeout(
+        sb.from('tasks').select('*').eq('id', state.editId).maybeSingle(),
+        8000
+      );
+      if (readErr) { setSyncStatus('error'); showToast('Error saving: ' + readErr.message); return; }
+      if (!data) {
+        setSyncStatus('error');
+        showToast('Error saving: update returned no row');
+        return;
+      }
       const idx = state.tasks.findIndex(t=>t.id===state.editId);
-      if (idx>=0 && data) state.tasks[idx] = { ...state.tasks[idx], ...data[0] };
-      saved = data && data[0] ? data[0] : state.tasks[idx];
+      if (idx>=0) state.tasks[idx] = { ...state.tasks[idx], ...data };
+      saved = data;
     } else {
-      const { data, error } = await sb.from('tasks').insert([payload]).select();
+      const { data, error } = await withTimeout(
+        sb.from('tasks').insert([payload]).select(),
+        10000
+      );
       if (error) { setSyncStatus('error'); showToast('Error saving: ' + error.message); return; }
       if (data) { state.tasks.push(data[0]); saved = data[0]; }
     }
@@ -1164,6 +1192,9 @@ async function saveTask() {
       showToast('Saved — find it in ' + (catName || 'All Tasks'));
     }
     checkNotification(payload);
+  } catch (e) {
+    setSyncStatus('error');
+    showToast('Error saving: ' + (e && e.message ? e.message : e));
   } finally {
     _saveTaskBusy = false;
     if (btn) { btn.disabled = false; btn.textContent = 'Save Task'; }
