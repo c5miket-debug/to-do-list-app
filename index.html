@@ -172,6 +172,35 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 }
 .auth-google:hover { border-color: var(--border2); background: var(--surface2); }
 .auth-google svg { width: 18px; height: 18px; flex-shrink: 0; }
+.auth-google-pri {
+  padding: 11px;
+  font-size: 14px;
+  border-color: var(--accent);
+}
+.auth-google-pri:hover { border-color: var(--accent); background: var(--accent-bg); }
+.auth-recommended {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  margin-top: 8px;
+}
+.auth-email-toggle {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font);
+  padding: 4px 0 2px;
+}
+.auth-email-toggle:hover { text-decoration: underline; }
+.auth-email-section { display: none; margin-top: 16px; }
+.auth-email-section.open { display: block; }
 .auth-error {
   background: var(--danger-bg); color: var(--danger); border: 1px solid #f5c6c6;
   border-radius: var(--radius); padding: 10px 12px; font-size: 13px;
@@ -188,6 +217,48 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
   font-size: 12px; color: var(--text3);
 }
 .auth-footer a { color: var(--accent); cursor: pointer; text-decoration: none; }
+
+/* Getting started tips */
+.tips-wrap { display: none; padding: 10px 20px 4px; flex-shrink: 0; }
+.tips-wrap.show { display: block; }
+.tips-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin-bottom: 8px;
+}
+.tips-title {
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.tips-hide {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; font-weight: 500; color: var(--accent);
+  font-family: var(--font); padding: 2px 4px;
+}
+.tips-hide:hover { text-decoration: underline; }
+.tips-list {
+  display: flex; gap: 8px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 4px;
+}
+.tips-list::-webkit-scrollbar { height: 4px; }
+.tips-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.tip-card {
+  flex: 0 0 260px; scroll-snap-align: start;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 12px 12px 10px;
+}
+.tip-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.tip-card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; padding-right: 4px; }
+.tip-card-body { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.tip-card-body .badge { margin: 0 1px; vertical-align: middle; }
+.tip-card .close-btn { flex-shrink: 0; margin-top: -2px; }
+.tip-gotit {
+  display: inline-block; margin-top: 8px; background: none; border: none;
+  cursor: pointer; font-size: 12px; font-weight: 500; color: var(--accent);
+  font-family: var(--font); padding: 0;
+}
+.tip-gotit:hover { text-decoration: underline; }
 
 /* User menu in topbar */
 .user-menu-wrap { position: relative; }
@@ -410,6 +481,8 @@ textarea.form-input { resize: vertical; min-height: 70px; }
 
   /* Hide filter bar priority label on mobile to save space */
   .filterbar { padding: 6px 12px; gap: 5px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .tips-wrap { padding: 8px 12px 2px; }
+  .tip-card { flex-basis: min(260px, 82vw); }
   .filterbar::-webkit-scrollbar { display: none; }
   .filterbar-label { display: none; }
   .sort-select { margin-left: 0; font-size: 11px; }
@@ -544,35 +617,40 @@ textarea.form-input { resize: vertical; min-height: 70px; }
     <div class="auth-logo"><div class="logo-dot"></div> TaskFlow</div>
     <div class="auth-tagline">Your tasks, everywhere.</div>
 
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
-      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
-    </div>
-
     <div class="auth-error" id="auth-error"></div>
     <div class="auth-message" id="auth-message"></div>
 
-    <div class="auth-field">
-      <label>Email</label>
-      <input type="email" id="auth-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')authSubmit()">
-    </div>
-    <div class="auth-field" id="auth-pw-field">
-      <label>Password</label>
-      <input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()">
-    </div>
-
-    <button class="auth-submit" id="auth-submit-btn" onclick="authSubmit()">Sign In</button>
-
-    <div class="auth-divider">or</div>
-
-    <button class="auth-google" onclick="authGoogle()">
+    <button class="auth-google auth-google-pri" onclick="authGoogle()">
       <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       Continue with Google
     </button>
+    <div class="auth-recommended">Recommended</div>
 
-    <div class="auth-footer">
-      <span id="auth-footer-text">Don't have an account? <a onclick="switchAuthTab('signup')">Sign up</a></span>
-      <a id="auth-forgot" onclick="authForgot()">Forgot password?</a>
+    <div class="auth-divider">or</div>
+
+    <button type="button" class="auth-email-toggle" id="auth-email-toggle" onclick="toggleAuthEmail()">Use email instead</button>
+
+    <div class="auth-email-section" id="auth-email-section">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+        <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')authSubmit()">
+      </div>
+      <div class="auth-field" id="auth-pw-field">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()">
+      </div>
+
+      <button class="auth-submit" id="auth-submit-btn" onclick="authSubmit()">Sign In</button>
+
+      <div class="auth-footer">
+        <span id="auth-footer-text">Don't have an account? <a onclick="switchAuthTab('signup')">Sign up</a></span>
+        <a id="auth-forgot" onclick="authForgot()">Forgot password?</a>
+      </div>
     </div>
   </div>
 </div>
@@ -582,8 +660,8 @@ textarea.form-input { resize: vertical; min-height: 70px; }
     <div class="sidebar-logo"><div class="logo-dot"></div> TaskFlow</div>
     <div class="sidebar-section">
       <div class="sidebar-label">Views</div>
-      <div class="nav-item" data-view="all" onclick="setView('all')"><span class="nav-icon">⊞</span> All Tasks <span class="nav-count" id="cnt-all">0</span></div>
-      <div class="nav-item active" data-view="today" onclick="setView('today')"><span class="nav-icon">○</span> Today <span class="nav-count" id="cnt-today">0</span></div>
+      <div class="nav-item active" data-view="all" onclick="setView('all')"><span class="nav-icon">⊞</span> All Tasks <span class="nav-count" id="cnt-all">0</span></div>
+      <div class="nav-item" data-view="today" onclick="setView('today')"><span class="nav-icon">○</span> Today <span class="nav-count" id="cnt-today">0</span></div>
       <div class="nav-item" data-view="starred" onclick="setView('starred')"><span class="nav-icon">★</span> Starred <span class="nav-count" id="cnt-starred">0</span></div>
       <div class="nav-item" data-view="top5" onclick="setView('top5')"><span class="nav-icon">↑</span> Up Next 5</div>
       <div class="nav-item" data-view="top10" onclick="setView('top10')"><span class="nav-icon">↑</span> Up Next 10</div>
@@ -638,6 +716,14 @@ textarea.form-input { resize: vertical; min-height: 70px; }
         <option value="alpha">Sort: A–Z</option>
         <option value="pinned">Sort: Starred First</option>
       </select>
+    </div>
+
+    <div class="tips-wrap" id="tips-wrap">
+      <div class="tips-header">
+        <div class="tips-title">Getting started</div>
+        <button type="button" class="tips-hide" onclick="dismissAllTips()">Hide tips</button>
+      </div>
+      <div class="tips-list" id="tips-list"></div>
     </div>
 
     <div class="task-list" id="task-list"><div class="loading"><div class="spinner"></div> Loading tasks...</div></div>
@@ -821,6 +907,10 @@ textarea.form-input { resize: vertical; min-height: 70px; }
         </button>
       </div>
     </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Tips</div>
+      <button class="btn-sec" type="button" onclick="showTipsAgain()">Show tips again</button>
+    </div>
     <div class="form-footer">
       <button class="btn-sec" onclick="closeSettings()">Close</button>
     </div>
@@ -835,7 +925,7 @@ const SUPA_URL = 'https://vjrxzxypctkecfzlwnjs.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcnh6eHlwY3RrZWNmemx3bmpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDA2NTQsImV4cCI6MjA5MzI3NjY1NH0.N6FDP9a9jMP3Cx2lR3a5IGY5_ubl0S57_7o4pve_IvU';
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-let state = { tasks: [], cats: [], view: 'today', priFilter: [], editId: null, formPrio: 4, formSubtasks: [] };
+let state = { tasks: [], cats: [], view: 'all', priFilter: [], editId: null, formPrio: 4, formSubtasks: [] };
 
 function setSyncStatus(s) {
   const el = document.getElementById('sync-status');
@@ -1603,6 +1693,103 @@ function updateMobBadges() {
   if (doneBadge) { doneBadge.textContent = doneCnt; }
 }
 
+// ── Getting started tips ──────────────────────────────────────────────────────
+// Bump TIPS_VERSION (e.g. 'v1' → 'v2') to show tips again for every user/device.
+const TIPS_VERSION = 'v1';
+const TIPS = [
+  {
+    id: 'priorities',
+    title: 'Priorities',
+    body: 'Each task has a priority: <span class="badge p1-badge">P1</span> Critical, <span class="badge p2-badge">P2</span> High, <span class="badge p3-badge">P3</span> Normal, and <span class="badge p4-badge">P4</span> Low. New tasks default to P4. Use the chips above the list to filter by priority.'
+  },
+  {
+    id: 'today-vs-all',
+    title: 'Today vs All Tasks',
+    body: 'Today shows tasks due today, overdue tasks, and starred tasks. Tasks without a due date live in All Tasks. Creating a new task from the Today view fills in today’s date as the due date.'
+  },
+  {
+    id: 'starring',
+    title: 'Starring tasks',
+    body: 'Tap the star on a task to pin it. Starred tasks appear in the Starred view and also show up in Today, even if they have no due date.'
+  },
+  {
+    id: 'categories',
+    title: 'Categories',
+    body: 'Group related tasks with categories. Add one from the sidebar (or More on mobile), then assign it when you edit a task. Open a category to see only those tasks.'
+  },
+  {
+    id: 'recurring',
+    title: 'Recurring tasks',
+    body: 'Set a task to repeat Daily, Weekly, Bi-weekly, Monthly, or Yearly. When you complete a recurring task that has a due date, the next occurrence is scheduled automatically.'
+  }
+];
+
+function tipsStorageKey() {
+  if (!currentUser || !currentUser.id) return null;
+  return 'tf-tips-' + TIPS_VERSION + '-' + currentUser.id;
+}
+function loadTipsState() {
+  const key = tipsStorageKey();
+  if (!key) return { all: true };
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return { dismissed: [] };
+    const parsed = JSON.parse(raw);
+    if (parsed === true || (parsed && parsed.all)) return { all: true };
+    if (parsed && Array.isArray(parsed.dismissed)) return { dismissed: parsed.dismissed };
+    return { dismissed: [] };
+  } catch (e) {
+    return { dismissed: [] };
+  }
+}
+function saveTipsState(st) {
+  const key = tipsStorageKey();
+  if (!key) return;
+  localStorage.setItem(key, JSON.stringify(st));
+}
+function renderTips() {
+  const wrap = document.getElementById('tips-wrap');
+  const list = document.getElementById('tips-list');
+  if (!wrap || !list) return;
+  const st = loadTipsState();
+  const remaining = (st.all ? [] : TIPS.filter(tip => !st.dismissed.includes(tip.id)));
+  if (!remaining.length) {
+    wrap.classList.remove('show');
+    return;
+  }
+  list.innerHTML = remaining.map(tip =>
+    '<div class="tip-card" data-tip="' + tip.id + '">' +
+      '<div class="tip-card-top">' +
+        '<div>' +
+          '<div class="tip-card-title">' + tip.title + '</div>' +
+          '<div class="tip-card-body">' + tip.body + '</div>' +
+          '<button type="button" class="tip-gotit" onclick="dismissTip(\'' + tip.id + '\')">Got it</button>' +
+        '</div>' +
+        '<button type="button" class="close-btn" title="Dismiss" onclick="dismissTip(\'' + tip.id + '\')">×</button>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+  wrap.classList.add('show');
+}
+function dismissTip(id) {
+  const st = loadTipsState();
+  if (st.all) return;
+  if (!st.dismissed.includes(id)) st.dismissed.push(id);
+  if (st.dismissed.length >= TIPS.length) saveTipsState({ all: true });
+  else saveTipsState(st);
+  renderTips();
+}
+function dismissAllTips() {
+  saveTipsState({ all: true });
+  renderTips();
+}
+function showTipsAgain() {
+  const key = tipsStorageKey();
+  if (key) localStorage.removeItem(key);
+  closeSettings();
+  renderTips();
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 let currentUser = null;
 
@@ -1623,6 +1810,17 @@ function switchAuthTab(tab) {
     : 'Already have an account? <a onclick="switchAuthTab(\'signin\')">Sign in</a>';
   document.getElementById('auth-forgot').style.display = isSignIn ? '' : 'none';
   clearAuthMessages();
+}
+
+function toggleAuthEmail() {
+  const section = document.getElementById('auth-email-section');
+  const open = !section.classList.contains('open');
+  section.classList.toggle('open', open);
+  document.getElementById('auth-email-toggle').textContent = open ? 'Hide email sign-in' : 'Use email instead';
+  if (open) {
+    const email = document.getElementById('auth-email');
+    if (email) setTimeout(() => email.focus(), 60);
+  }
 }
 
 function clearAuthMessages() {
@@ -1682,8 +1880,9 @@ async function authSignOut() {
   closeUserMenu();
   await sb.auth.signOut();
   currentUser = null;
-  state.tasks = []; state.cats = [];
+  state.tasks = []; state.cats = []; state.view = 'all';
   render();
+  renderTips();
   showAuthScreen();
 }
 
@@ -1716,6 +1915,7 @@ let _appReady = false;
       hideAuthScreen();
       await loadData();
       await loadUserSettings();
+      renderTips();
     } else {
       showAuthScreen();
     }
@@ -1732,12 +1932,16 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
     setUserUI(session.user);
     hideAuthScreen();
+    state.view = 'all';
     await loadData();
     await loadUserSettings();
+    setView('all');
+    renderTips();
   } else if (event === 'SIGNED_OUT') {
     currentUser = null;
-    state.tasks = []; state.cats = [];
+    state.tasks = []; state.cats = []; state.view = 'all';
     render();
+    renderTips();
     showAuthScreen();
   }
 });
